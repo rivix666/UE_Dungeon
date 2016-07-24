@@ -22,11 +22,11 @@ enum ETileType
 
 struct SPoint
 {
-	uint X;
-	uint Y;
+	int X;
+	int Y;
 
 	SPoint() : X(0), Y(0) {}
-	SPoint(uint x, uint y) : X(x), Y(y) {}
+	SPoint(int x, int y) : X(x), Y(y) {}
 	~SPoint() {}
 
 	bool operator==(const SPoint& r)
@@ -40,15 +40,15 @@ struct SPoint
 
 struct SRoom
 {
-	uint PosX;
-	uint PosY;
-	uint SizeX;
-	uint SizeY;
+	int PosX;
+	int PosY;
+	int SizeX;
+	int SizeY;
 
 	std::vector <SPoint> RoomDoors;
 
 	SRoom() : PosX(0), PosY(0), SizeX(0), SizeY(0) {}
-	SRoom(uint x, uint y, uint size_x, uint size_y) :
+	SRoom(int x, int y, int size_x, int size_y) :
 		PosX(x), PosY(y), SizeX(size_x), SizeY(size_y) {}
 	~SRoom() {}
 

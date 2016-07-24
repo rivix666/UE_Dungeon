@@ -1,8 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "UE_Dungeon.h"
 #include "DungeonGenerator.h"
 
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 // Sets default values
 ADungeonGenerator::ADungeonGenerator() : m_MaxWidth(50), m_MaxHeight(50)
@@ -17,11 +20,10 @@ void ADungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 	ClearMazeArray();
-	GenRooms(20);
-	CarveCorridorsBetweenRooms(0);
-	ConnectRooms();
-	UncarveDungeon(20);
+	GenRooms(10, true);
 	RemoveUnnecessaryTiles();
+
+	//SpawnRoom(*m_RootRoom);
 
 	PlaceWalls();
 }
@@ -37,10 +39,10 @@ void ADungeonGenerator::Tick( float DeltaTime )
 //////////////////////////////////////////////////////////////////////////
 void ADungeonGenerator::InitMazeArray()
 {
-	m_MazeArr = new uint*[m_MaxWidth];
-	for (uint i = 0; i < m_MaxWidth; i++)
+	m_MazeArr = new int*[m_MaxWidth];
+	for (int i = 0; i < m_MaxWidth; i++)
 	{
-		m_MazeArr[i] = new uint[m_MaxHeight];
+		m_MazeArr[i] = new int[m_MaxHeight];
 	}
 
 	ClearMazeArray();
@@ -66,9 +68,9 @@ void ADungeonGenerator::InitDirectionArrays()
 
 void ADungeonGenerator::ClearMazeArray()
 {
-	for (uint i = 0; i < m_MaxWidth; i++)
+	for (int i = 0; i < m_MaxWidth; i++)
 	{
-		for (uint j = 0; j < m_MaxHeight; j++)
+		for (int j = 0; j < m_MaxHeight; j++)
 		{
 			m_MazeArr[i][j] = SolidRock;
 		}
@@ -77,9 +79,9 @@ void ADungeonGenerator::ClearMazeArray()
 	m_RoomsVec.clear();
 }
 
-void ADungeonGenerator::ShuffleDirArray(uint* arr, uint size)
+void ADungeonGenerator::ShuffleDirArray(int* arr, int size)
 {
-	for (uint i = 0; i < (size - 1); i++)
+	for (int i = 0; i < (size - 1); i++)
 	{
 		int r = i + (FMath::RandRange(0, size - i));
 		int temp = arr[i];
@@ -90,10 +92,46 @@ void ADungeonGenerator::ShuffleDirArray(uint* arr, uint size)
 
 // Dungeon Generation Methods
 //////////////////////////////////////////////////////////////////////////
-void ADungeonGenerator::GenRooms(int attempts)
+void ADungeonGenerator::GenRooms(int attempts, bool first /*=false*/)
 {
-	uint nx, ny;
-	uint size_x, size_y;
+	int nx, ny;
+	int size_x, size_y;
+
+	if (first)
+	{
+		size_x = 6;
+		size_y = 6;
+		nx = (m_MaxWidth - 6) / 2;
+		ny = (m_MaxHeight - 6) / 2;
+
+		CarveRoom(nx, ny, size_x, size_y);
+		m_RootRoom = &m_RoomsVec.back();
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	//	DEBUG	
+	//////////////////////////////////////////////////////////////////////////
+// 	std::ofstream myfile;
+// 	myfile.open("example.txt");
+// 	for (int i = 0; i < m_MaxWidth; i++)
+// 	{
+// 		std::string aha;
+// 		for (int j = 0; j < m_MaxHeight; j++)
+// 		{
+// 			std::string tmp;
+// 
+// 			std::stringstream out;
+// 			out << m_MazeArr[i][j];
+// 			tmp = out.str();
+// 
+// 			aha += tmp;
+// 		}
+// 		aha += "\n";
+// 		myfile << aha.c_str();
+// 	}
+// 	myfile.close();
+	//////////////////////////////////////////////////////////////////////////
+
 	for (int i = 0; i < attempts; i++)
 	{
 		if (FMath::RandRange(0, 2) == SolidRock)
@@ -117,16 +155,11 @@ void ADungeonGenerator::GenRooms(int attempts)
 	}
 }
 
-void ADungeonGenerator::GenMazeRecursiveBacktracking(uint pos_x, uint pos_y)
+void ADungeonGenerator::CarveRoom(int x, int y, int size_x, int size_y)
 {
-
-}
-
-void ADungeonGenerator::CarveRoom(uint x, uint y, uint size_x, uint size_y)
-{
-	for (uint i = 0; i < size_x; i++)
+	for (int i = 0; i < size_x; i++)
 	{
-		for (uint j = 0; j < size_y; j++)
+		for (int j = 0; j < size_y; j++)
 		{
 			m_MazeArr[x + i][y + j] = Room;
 		}
@@ -135,43 +168,13 @@ void ADungeonGenerator::CarveRoom(uint x, uint y, uint size_x, uint size_y)
 	m_RoomsVec.push_back(SRoom(x, y, size_x, size_y));
 }
 
-void ADungeonGenerator::CarveCorridorsBetweenRooms(uint attempts /*= 0*/)
-{
-
-}
-
-void ADungeonGenerator::ConnectRooms()
-{
-
-}
-
-void ADungeonGenerator::ConnectRoom(SRoom& room)
-{
-
-}
-
-void ADungeonGenerator::UncarveDungeon(int when_stop /*= -1*/)
-{
-
-}
-
-void ADungeonGenerator::UncarveCorridor(uint x, uint y, int when_stop)
-{
-
-}
-
-bool ADungeonGenerator::NextTileInCorridor(uint& nx, uint& ny)
-{
-	return false;
-}
-
 void ADungeonGenerator::RemoveUnnecessaryTiles()
 {
-	std::vector <uint*> tiles_to_remove;
+	std::vector <int*> tiles_to_remove;
 
-	for (uint i = 1; i < m_MaxWidth - 1; i++)
+	for (int i = 1; i < m_MaxWidth - 1; i++)
 	{
-		for (uint j = 1; j < m_MaxHeight - 1; j++)
+		for (int j = 1; j < m_MaxHeight - 1; j++)
 		{
 			if (m_MazeArr[i][j] != SolidRock)
 				continue;
@@ -181,32 +184,32 @@ void ADungeonGenerator::RemoveUnnecessaryTiles()
 		}
 	}
 
-	for (uint* t : tiles_to_remove)
+	for (int* t : tiles_to_remove)
 		*t = Nothing;
 
-	for (uint i = 0; i < m_MaxWidth; i++)
+	for (int i = 0; i < m_MaxWidth; i++)
 	{
 		if (m_MazeArr[i][1] == Nothing || m_MazeArr[i][1] == SolidRock)
 			m_MazeArr[i][0] = Nothing;
 
-		uint h = m_MaxHeight - 2;
+		int h = m_MaxHeight - 2;
 		if (m_MazeArr[i][h] == Nothing || m_MazeArr[i][h] == SolidRock)
 			m_MazeArr[i][++h] = Nothing;
 	}
 
-	for (uint i = 0; i < m_MaxHeight; i++)
+	for (int i = 0; i < m_MaxHeight; i++)
 	{
 		if (m_MazeArr[1][i] == Nothing || m_MazeArr[1][i] == SolidRock)
 			m_MazeArr[0][i] = Nothing;
 
 
-		uint w = m_MaxWidth - 2;
+		int w = m_MaxWidth - 2;
 		if (m_MazeArr[w][i] == Nothing || m_MazeArr[w][i] == SolidRock)
 			m_MazeArr[++w][i] = Nothing;
 	}
 }
 
-int ADungeonGenerator::CheckNeighbours(uint dir, uint x, uint y)
+int ADungeonGenerator::CheckNeighbours(int dir, int x, int y)
 {
 	int walls = 0;
 	switch (dir)
@@ -252,9 +255,9 @@ int ADungeonGenerator::CheckNeighbours(uint dir, uint x, uint y)
 	return walls;
 }
 
-int ADungeonGenerator::CheckNeighbours(uint x, uint y, ETileType type)
+int ADungeonGenerator::CheckNeighbours(int x, int y, ETileType type)
 {
-	uint walls = 0;
+	int walls = 0;
 	if (m_MazeArr[x + 1][y] == type) walls++;
 	if (m_MazeArr[x - 1][y] == type) walls++;
 	if (m_MazeArr[x][y + 1] == type) walls++;
@@ -262,9 +265,9 @@ int ADungeonGenerator::CheckNeighbours(uint x, uint y, ETileType type)
 	return walls;
 }
 
-int ADungeonGenerator::CheckNeighboursCross(uint x, uint y, ETileType type)
+int ADungeonGenerator::CheckNeighboursCross(int x, int y, ETileType type)
 {
-	uint walls = 0;
+	int walls = 0;
 	if (m_MazeArr[x + 1][y + 1] == type) walls++;
 	if (m_MazeArr[x + 1][y - 1] == type) walls++;
 	if (m_MazeArr[x - 1][y + 1] == type) walls++;
@@ -272,9 +275,9 @@ int ADungeonGenerator::CheckNeighboursCross(uint x, uint y, ETileType type)
 	return walls;
 }
 
-int ADungeonGenerator::IsThereAnyNeighbour(uint x, uint y, int type)
+int ADungeonGenerator::IsThereAnyNeighbour(int x, int y, int type)
 {
-	uint walls = 0;
+	int walls = 0;
 	if (m_MazeArr[x + 1][y] != type) walls++;
 	if (m_MazeArr[x - 1][y] != type) walls++;
 	if (m_MazeArr[x][y + 1] != type) walls++;
@@ -282,16 +285,16 @@ int ADungeonGenerator::IsThereAnyNeighbour(uint x, uint y, int type)
 	return walls;
 }
 
-bool ADungeonGenerator::AreFieldsEmpty(uint x, uint y, uint size_x, uint size_y)
+bool ADungeonGenerator::AreFieldsEmpty(int x, int y, int size_x, int size_y)
 {
-	uint nx = x - 1;
-	uint ny = y - 1;
-	uint size_nx = size_x + 2;
-	uint size_ny = size_y + 2;
+	int nx = x - 1;
+	int ny = y - 1;
+	int size_nx = size_x + 2;
+	int size_ny = size_y + 2;
 
-	for (uint i = 0; i < size_nx; i++)
+	for (int i = 0; i < size_nx; i++)
 	{
-		for (uint j = 0; j < size_ny; j++)
+		for (int j = 0; j < size_ny; j++)
 		{
 			if (m_MazeArr[nx + i][ny + j] != SolidRock)
 				return false;
@@ -308,11 +311,28 @@ void ADungeonGenerator::SpawnRooms()
 
 }
 
+void ADungeonGenerator::SpawnRoom(const SRoom& room)
+{
+	//SpawnWallCorner(0.f, 0.f, FRotator(0.0f, 270.0f, 0.0f)); // Down/Left
+	//SpawnWallCorner(0.f, 0.f, FRotator(0.0f, 0.0f, 0.0f)); // Up/Left
+	//SpawnWallCorner(0.f, 0.f, FRotator(0.0f, 180.0f, 0.0f)); // Down/Right
+	//SpawnWallCorner(0.f, 0.f, FRotator(0.0f, 90.0f, 0.0f)); // Up/Right
+
+	//SpawnWall(0.f, 0.f, FRotator(0.0f, 270.0f, 0.0f)); // Left
+	//SpawnWall(500.f, 0.f, FRotator(0.0f, 0.0f, 0.0f)); // Up
+	//SpawnWall(1000.f, 0.f, FRotator(0.0f, 180.0f, 0.0f)); // Down
+	//SpawnWall(1500.f, 0.f, FRotator(0.0f, 90.0f, 0.0f)); // Right
+
+
+	int nx = room.PosX;
+	int ny = room.PosY;
+}
+
 void ADungeonGenerator::PlaceWalls()
 {
-	for (uint i = 1; i < m_MaxWidth - 1; i++)
+	for (int i = 1; i < m_MaxWidth - 1; i++)
 	{
-		for (uint j = 1; j < m_MaxHeight - 1; j++)
+		for (int j = 1; j < m_MaxHeight - 1; j++)
 		{
 			if (m_MazeArr[i][j] == SolidRock)
 			{
@@ -329,7 +349,7 @@ void ADungeonGenerator::PlaceWalls()
 	}
 }
 
-void ADungeonGenerator::PlaceWall(uint x, uint y)
+void ADungeonGenerator::PlaceWall(int x, int y)
 {
 	float fx = (float)x;
 	float fy = (float)y;
@@ -371,7 +391,7 @@ void ADungeonGenerator::PlaceWall(uint x, uint y)
 	}
 }
 
-void ADungeonGenerator::PlaceWallCorner(uint x, uint y)
+void ADungeonGenerator::PlaceWallCorner(int x, int y)
 {
 	float fx = (float)x;
 	float fy = (float)y;
