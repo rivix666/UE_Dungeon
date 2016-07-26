@@ -3,20 +3,23 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "Wall.generated.h"
+#include "Room.generated.h"
 
 UCLASS()
-class UE_DUNGEON_API AWall : public AActor
+class UE_DUNGEON_API ARoom : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AWall();
+	ARoom();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
+
+	
+	
 };

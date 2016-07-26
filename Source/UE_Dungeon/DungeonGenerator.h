@@ -43,7 +43,9 @@ protected:
 
 	// Dungeon Generation 
 	void                        GenRooms(int attempts, bool first = false);
-	void                        CarveRoom(int x, int y, int size_x, int size_y);
+	void						AddDoors(int x, int y, EDir dir, SRoom& room);
+	void						CreateDoors(SRoom& room);
+	SRoom&                      CarveRoom(int x, int y, int size_x, int size_y);
 	void                        RemoveUnnecessaryTiles();
 
 	int                         CheckNeighbours(int dir, int x, int y);
@@ -56,12 +58,15 @@ protected:
 	void						SpawnRooms();
 	void						SpawnRoom(const SRoom& room);
 
-
 	void						PlaceWalls();
-	void						PlaceWall(int x, int y);
-	void						PlaceWallCorner(int x, int y);
-	void						SpawnWall(float x, float y, FRotator rot);
+	void						PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWall>* wall);
+	void						PlaceWallCorner(int x, int y, ECornerDir dir);
+
+	AActor*						SpawnWall(float x, float y, FRotator rot, const TSubclassOf<AWall>* wall);
 	void						SpawnWallCorner(float x, float y, FRotator rot);
+
+	// Others
+	void						SpawnPlayerInRoom(const SRoom& room);
 
 private:
 	int                        m_MaxWidth;
