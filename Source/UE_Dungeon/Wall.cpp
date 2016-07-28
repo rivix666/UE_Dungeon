@@ -16,13 +16,11 @@ AWall::AWall()
 void AWall::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void AWall::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-
 }
 

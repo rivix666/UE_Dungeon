@@ -33,6 +33,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Wall Corner 0")
 		TSubclassOf<AWall> m_WallCorner0;
+	UPROPERTY(EditDefaultsOnly, Category = "Wall Corner 1 In")
+		TSubclassOf<AWall> m_WallCorner1_In;
+	UPROPERTY(EditDefaultsOnly, Category = "Wall Corner 2 Out")
+		TSubclassOf<AWall> m_WallCorner2_Out;
 
 protected:
 	// Maze array controll methods
@@ -55,24 +59,32 @@ protected:
 	bool                        AreFieldsEmpty(int x, int y, int size_x, int size_y);
 
 	// Mesh Placers
-	void						SpawnRooms();
-	void						SpawnRoom(const SRoom& room);
+	void						PlaceRoom(const SRoom& room);
+	void						PlacePassage(int x, int y, int dirs);
 
-	void						PlaceWalls();
-	void						PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWall>* wall);
-	void						PlaceWallCorner(int x, int y, ECornerDir dir);
+	// Corridors
+	void						PlaceCorridor(int x, int y, EDir open_dirs);
+	void						PlaceDeadEnd(int x, int y, EDir open_dir);
+	void						PlaceCrossRoad(int x, int y);
+	void						PlaceTCrossRoad(int x, int y, EDir open_dirs);
 
-	AActor*						SpawnWall(float x, float y, FRotator rot, const TSubclassOf<AWall>* wall);
-	void						SpawnWallCorner(float x, float y, FRotator rot);
+	// Walls
+	void						PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWall>* wall = nullptr);
+	void						PlaceWallCorner(int x, int y, ECornerDir dir, const TSubclassOf<AWall>* wall = nullptr);
+
+	// Spawners
+	AActor*						SpawnWall(float x, float y, FRotator rot, const TSubclassOf<AWall>* wall = nullptr);
+	AActor*						SpawnWallCorner(float x, float y, FRotator rot, const TSubclassOf<AWall>* wall = nullptr);
+
+	void						SpawnPlayerInRoom(const SRoom& room);
 
 	// Others
-	void						SpawnPlayerInRoom(const SRoom& room);
+	int							NumberOfSetBits(int i);
 
 private:
 	int                        m_MaxWidth;
 	int                        m_MaxHeight;
 
-	const float				   TILE_SIZE = 200.0f;
     SRoom*					   m_RootRoom;
 
 	// Containers
@@ -81,7 +93,10 @@ private:
 	int                        m_DirYArr[9];
 	int                        m_DirOppositeArr[9];
 
-	std::vector <SRoom>         m_RoomsVec;
+	std::vector <SRoom>        m_RoomsVec;
+
+	uint					   m_TorchIncrementator;;
+	uint					   m_TorchModulo;
 
 
 };

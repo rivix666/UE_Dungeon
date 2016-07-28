@@ -7,8 +7,13 @@
 #include <fstream>
 #include <sstream>
 
+// TODO zrobic porz¹dek z kierunkami N ma byc do góry!!
+
 // Sets default values
-ADungeonGenerator::ADungeonGenerator() : m_MaxWidth(50), m_MaxHeight(50)
+ADungeonGenerator::ADungeonGenerator() : 
+	m_MaxWidth(50), m_MaxHeight(50), 
+	m_TorchIncrementator(0),
+	m_TorchModulo(FMath::RandRange(3, 8))
 {
 	PrimaryActorTick.bCanEverTick = false;
 	InitMazeArray();
@@ -21,15 +26,21 @@ void ADungeonGenerator::BeginPlay()
 	Super::BeginPlay();
 	ClearMazeArray();
 	GenRooms(50, true);
-	RemoveUnnecessaryTiles();
+//	RemoveUnnecessaryTiles();
 
 
 	for(SRoom room : m_RoomsVec)
-		SpawnRoom(room);
-
-
+		PlaceRoom(room);
 
 	SpawnPlayerInRoom(m_RoomsVec[0]);
+
+// 	PlacePassage(0.0, 0.0, N);
+// 	PlacePassage(0.0, 0.0, S);
+// 	PlacePassage(0.0, 0.0, E);
+// 	PlacePassage(0.0, 0.0, W);
+// 	PlacePassage(0.0, 0.0, N | S | E | W);
+// 	PlacePassage(0.0, 0.0, N | S);
+// 	PlacePassage(0.0, 0.0, N | W);
 
 	//PlaceWalls();
 }
@@ -38,7 +49,6 @@ void ADungeonGenerator::BeginPlay()
 void ADungeonGenerator::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-
 }
 
 // Array Methods
@@ -370,12 +380,9 @@ bool ADungeonGenerator::AreFieldsEmpty(int x, int y, int size_x, int size_y)
 
 // Mesh Placer
 //////////////////////////////////////////////////////////////////////////
-void ADungeonGenerator::SpawnRooms()
-{
 
-}
-
-void ADungeonGenerator::SpawnRoom(const SRoom& room)
+// Rooms
+void ADungeonGenerator::PlaceRoom(const SRoom& room)
 {
 	// Place Walls
 	int n0, n1, n2;
@@ -384,8 +391,8 @@ void ADungeonGenerator::SpawnRoom(const SRoom& room)
 	for (int i = 0; i < room.SizeX; i++)
 	{
 		n0 = room.PosX + i;
-		PlaceWall(n0 * TILE_SIZE, n1 * TILE_SIZE, N, m_MazeArr[n0][n1] == Doors ? &m_WallDoorOpen : nullptr);
-		PlaceWall(n0 * TILE_SIZE, n2 * TILE_SIZE, S, m_MazeArr[n0][n2] == Doors ? &m_WallDoorOpen : nullptr);
+		PlaceWall(A2W(n0), A2W(n1), N, m_MazeArr[n0][n1] == Doors ? &m_WallDoorOpen : nullptr);
+		PlaceWall(A2W(n0), A2W(n2), S, m_MazeArr[n0][n2] == Doors ? &m_WallDoorOpen : nullptr);
 	}
 
 	n1 = (room.PosX - 1);
@@ -393,76 +400,93 @@ void ADungeonGenerator::SpawnRoom(const SRoom& room)
 	for (int j = 0; j < room.SizeY; j++)
 	{
 		n0 = room.PosY + j;
-		PlaceWall(n1 * TILE_SIZE, n0 * TILE_SIZE, W, m_MazeArr[n1][n0] == Doors ? &m_WallDoorOpen : nullptr);
-		PlaceWall(n2 * TILE_SIZE, n0 * TILE_SIZE, E, m_MazeArr[n2][n0] == Doors ? &m_WallDoorOpen : nullptr);
+		PlaceWall(A2W(n1), A2W(n0), W, m_MazeArr[n1][n0] == Doors ? &m_WallDoorOpen : nullptr);
+		PlaceWall(A2W(n2), A2W(n0), E, m_MazeArr[n2][n0] == Doors ? &m_WallDoorOpen : nullptr);
 	}
 
 	// Place Room Corners
-	n0 = (room.PosX - 1) * TILE_SIZE;
-	n1 = (room.PosY - 1) * TILE_SIZE;
+	n0 = A2W((room.PosX - 1));
+	n1 = A2W((room.PosY - 1));
 	PlaceWallCorner(n0, n1, SW);
-	n0 = (room.PosX - 1) * TILE_SIZE;
-	n1 = (room.PosY + room.SizeY) * TILE_SIZE;
+	n0 = A2W((room.PosX - 1));
+	n1 = A2W((room.PosY + room.SizeY));
 	PlaceWallCorner(n0, n1, SE);
-	n0 = (room.PosX + room.SizeX) * TILE_SIZE;
-	n1 = (room.PosY - 1) * TILE_SIZE;
+	n0 = A2W((room.PosX + room.SizeX));
+	n1 = A2W((room.PosY - 1));
 	PlaceWallCorner(n0, n1, NW);
-	n0 = (room.PosX + room.SizeX) * TILE_SIZE;
-	n1 = (room.PosY + room.SizeY) * TILE_SIZE;
+	n0 = A2W((room.PosX + room.SizeX));
+	n1 = A2W((room.PosY + room.SizeY));
 	PlaceWallCorner(n0, n1, NE);
 
 	// Place Outside Doors
 	for (SDoor door : room.RoomDoors) //to do calkie inaczej to zrobic, ogolnie caly kod ten jest mega chujowy, nie podoba mis ie w chuj
 	{
-		PlaceWall(door.OutsideDoor.X * TILE_SIZE, door.OutsideDoor.Y * TILE_SIZE, door.OutsideDoorDir, &m_WallDoorOpen);
+		PlaceWall(A2W(door.OutsideDoor.X), A2W(door.OutsideDoor.Y), door.OutsideDoorDir, &m_WallDoorOpen);
 
 		if (door.OutsideDoorDir == N)
 		{
-			PlaceWallCorner((door.OutsideDoor.X - 1.4) * TILE_SIZE, door.OutsideDoor.Y * TILE_SIZE, SW);
-			PlaceWallCorner((door.OutsideDoor.X + 1.4) * TILE_SIZE, door.OutsideDoor.Y * TILE_SIZE, NW);
+			PlaceWallCorner(A2W((door.OutsideDoor.X - 1./*4*/)), A2W(door.OutsideDoor.Y), SW);
+			PlaceWallCorner(A2W((door.OutsideDoor.X + 1./*4*/)), A2W(door.OutsideDoor.Y), NW);
 		}
 		else if (door.OutsideDoorDir == S)
 		{
-			PlaceWallCorner((static_cast<float>(door.OutsideDoor.X) + 1.4) * TILE_SIZE, door.OutsideDoor.Y * TILE_SIZE, NE);
-			PlaceWallCorner((static_cast<float>(door.OutsideDoor.X) - 1.4) * TILE_SIZE, door.OutsideDoor.Y * TILE_SIZE, SE); //r
+			PlaceWallCorner(A2W((static_cast<float>(door.OutsideDoor.X) + 1./*4*/)), A2W(door.OutsideDoor.Y), NE);
+			PlaceWallCorner(A2W((static_cast<float>(door.OutsideDoor.X) - 1./*4*/)), A2W(door.OutsideDoor.Y), SE); //r
 		}
 		else if (door.OutsideDoorDir == W)
 		{
-			PlaceWallCorner(door.OutsideDoor.X * TILE_SIZE, (static_cast<float>(door.OutsideDoor.Y) - 1.4) * TILE_SIZE, SW);
-			PlaceWallCorner(door.OutsideDoor.X * TILE_SIZE, (static_cast<float>(door.OutsideDoor.Y) + 1.4) * TILE_SIZE, SE);
+			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) - 1./*4*/)), SW);
+			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) + 1./*4*/)), SE);
 		}
 		else
 		{
-			PlaceWallCorner(door.OutsideDoor.X * TILE_SIZE * TILE_SIZE, (static_cast<float>(door.OutsideDoor.Y) - 1.4) * TILE_SIZE, NE);
-			PlaceWallCorner(door.OutsideDoor.X * TILE_SIZE * TILE_SIZE, (static_cast<float>(door.OutsideDoor.Y) + 1.4) * TILE_SIZE, NW); //r
+			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) - 1./*4*/)), NW);
+			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) + 1./*4*/)), NE); //r
 		}
-
-
 	}
 }
 
-void ADungeonGenerator::PlaceWalls()
+// Corridors
+void ADungeonGenerator::PlacePassage(int x, int y, int dirs)
 {
-// 	for (int i = 1; i < m_MaxWidth - 1; i++)
-// 	{
-// 		for (int j = 1; j < m_MaxHeight - 1; j++)
-// 		{
-// 			if (m_MazeArr[i][j] == SolidRock)
-// 			{
-// 				PlaceWall(i, j);
-// 				continue;
-// 			}
-// 
-// 			if (m_MazeArr[i][j] == Nothing)
-// 			{
-// 				PlaceWallCorner(i, j);
-// 				continue;
-// 			}
-// 		}
-// 	}
+	int counter = NumberOfSetBits(dirs);
+	switch (counter)
+	{
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	default:
+		break;
+	}
 }
 
-void ADungeonGenerator::PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWall>* wall)
+void ADungeonGenerator::PlaceCorridor(int x, int y, EDir open_dirs)
+{
+
+}
+
+void ADungeonGenerator::PlaceDeadEnd(int x, int y, EDir open_dir)
+{
+
+}
+
+void ADungeonGenerator::PlaceCrossRoad(int x, int y)
+{
+
+}
+
+void ADungeonGenerator::PlaceTCrossRoad(int x, int y, EDir open_dirs)
+{
+
+}
+
+// Walls
+void ADungeonGenerator::PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWall>* wall /*= nullptr*/)
 {
 	float fx = (float)x;
 	float fy = (float)y;
@@ -484,7 +508,7 @@ void ADungeonGenerator::PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWal
 	}
 }
 
-void ADungeonGenerator::PlaceWallCorner(int x, int y, ECornerDir dir)
+void ADungeonGenerator::PlaceWallCorner(int x, int y, ECornerDir dir, const TSubclassOf<AWall>* wall /*= nullptr*/)
 {
 	float fx = (float)x;
 	float fy = (float)y;
@@ -492,21 +516,23 @@ void ADungeonGenerator::PlaceWallCorner(int x, int y, ECornerDir dir)
 	switch (dir)
 	{
 	case NW:
-		SpawnWallCorner(fx - 40.0f, fy + 40.0f, FRotator::ZeroRotator);
+		SpawnWallCorner(fx, fy, FRotator::ZeroRotator, wall);
 		break;
 	case NE:
-		SpawnWallCorner(fx - 40.0f, fy - 40.0f, FRotator(0.0f, 90.0f, 0.0f));
+		SpawnWallCorner(fx, fy, FRotator(0.0f, 90.0f, 0.0f), wall);
 		break;
 	case SW:
-		SpawnWallCorner(fx + 40.0f, fy + 40.0f, FRotator(0.0f, 270.0f, 0.0f));
+		SpawnWallCorner(fx, fy, FRotator(0.0f, 270.0f, 0.0f), wall);
 		break;
 	case SE:
-		SpawnWallCorner(fx + 40.0f, fy - 40.0f, FRotator(0.0f, 180.0f, 0.0f));
+		SpawnWallCorner(fx, fy, FRotator(0.0f, 180.0f, 0.0f), wall);
 		break;
 	}
 }
 
-AActor* ADungeonGenerator::SpawnWall(float x, float y, FRotator rot, const TSubclassOf<AWall>* wall)
+// Spawners
+//////////////////////////////////////////////////////////////////////////
+AActor* ADungeonGenerator::SpawnWall(float x, float y, FRotator rot, const TSubclassOf<AWall>* wall /*= nullptr*/)
 {
 	AActor* newActor = nullptr;
 	const UWorld* world = GetWorld();
@@ -524,18 +550,22 @@ AActor* ADungeonGenerator::SpawnWall(float x, float y, FRotator rot, const TSubc
 			newActor = GetWorld()->SpawnActor<AWall>(*wall, newVec, rot, spawnParams);
 		else
 		{
-			if (FMath::RandRange(0, 3) != 0)
+			if (m_TorchIncrementator % m_TorchModulo != 0)
 				newActor = GetWorld()->SpawnActor<AWall>(m_Wall0, newVec, rot, spawnParams);
 			else
 				newActor = GetWorld()->SpawnActor<AWall>(m_Wall1, newVec, rot, spawnParams);
 		}
+
+		newActor->SetActorScale3D(SCALE_VEC); // set object scale
 	}
 
+	m_TorchIncrementator++;
 	return newActor;
 }
 
-void ADungeonGenerator::SpawnWallCorner(float x, float y, FRotator rot)
+AActor* ADungeonGenerator::SpawnWallCorner(float x, float y, FRotator rot, const TSubclassOf<AWall>* wall /*= nullptr*/)
 {
+	AActor* newActor = nullptr;
 	const UWorld* world = GetWorld();
 
 	if (world)
@@ -547,11 +577,17 @@ void ADungeonGenerator::SpawnWallCorner(float x, float y, FRotator rot)
 		FVector newVec;
 		newVec.Set(x, y, 0.0f);
 
-		AActor* newActor = GetWorld()->SpawnActor<AWall>(m_WallCorner0, newVec, rot, spawnParams);
+		if(wall)
+			newActor = GetWorld()->SpawnActor<AWall>(*wall, newVec, rot, spawnParams);
+		else
+			newActor = GetWorld()->SpawnActor<AWall>(m_WallCorner1_In, newVec, rot, spawnParams);
+
+		newActor->SetActorScale3D(SCALE_VEC); // set object scale
 	}
+
+	return newActor;
 }
 
-// Others
 void ADungeonGenerator::SpawnPlayerInRoom(const SRoom& room)
 {
 	ACharacter* myCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
@@ -560,7 +596,16 @@ void ADungeonGenerator::SpawnPlayerInRoom(const SRoom& room)
 		float x = (float)room.PosX + ((float)room.SizeX / 2.0f);
 		float y = (float)room.PosY + ((float)room.SizeY / 2.0f);
 
-		myCharacter->SetActorLocation(FVector(x, y, 0.0f));
+		myCharacter->SetActorLocation(FVector(A2W(x), A2W(y), 200.0f));
 	}
+}
+
+// Others
+//////////////////////////////////////////////////////////////////////////
+int ADungeonGenerator::NumberOfSetBits(int i)
+{
+	i = i - ((i >> 1) & 0x55555555);
+	i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+	return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
 }
 

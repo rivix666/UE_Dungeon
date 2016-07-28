@@ -1,16 +1,10 @@
 #pragma once
-
 #include <vector>
-// 
-// #define A2W(x) { x * 200.0f }
 
 typedef unsigned int uint;
 
-//SpawnWall(0.f, 0.f, FRotator(0.0f, 270.0f, 0.0f)); // Left
-//SpawnWall(500.f, 0.f, FRotator(0.0f, 0.0f, 0.0f)); // Up
-//SpawnWall(1000.f, 0.f, FRotator(0.0f, 180.0f, 0.0f)); // Down
-//SpawnWall(1500.f, 0.f, FRotator(0.0f, 90.0f, 0.0f)); // Right
-
+// Enums
+//////////////////////////////////////////////////////////////////////////
 enum EDir
 {
 	N = 1,
@@ -18,11 +12,6 @@ enum EDir
 	E = 4,
 	W = 8
 };
-
-//SpawnWallCorner(0.f + 40.0f, 0.f + 40.0f, FRotator(0.0f, 270.0f, 0.0f)); // Down/Left
-//SpawnWallCorner(0.f - 40.0f, 0.f + 40.0f, FRotator(0.0f, 0.0f, 0.0f)); // Up/Left
-//SpawnWallCorner(0.f + 40.0f, 0.f - 40.0f, FRotator(0.0f, 180.0f, 0.0f)); // Down/Right
-//SpawnWallCorner(0.f - 40.0f, 0.f - 40.0f, FRotator(0.0f, 90.0f, 0.0f)); // Up/Right
 
 enum ECornerDir
 {
@@ -41,6 +30,8 @@ enum ETileType
 	Doors = 16,
 };
 
+// Structs
+//////////////////////////////////////////////////////////////////////////
 struct SPoint
 {
 	int X;
@@ -142,3 +133,26 @@ struct SRoom
 		return result;
 	}
 };
+
+// Global Const
+//////////////////////////////////////////////////////////////////////////
+const float				   SCALE = 1.3f;
+const float				   TILE_SIZE = 200.0f * SCALE;
+const FVector			   SCALE_VEC = FVector(SCALE, SCALE, SCALE);
+
+// Defines
+//////////////////////////////////////////////////////////////////////////
+#define A2W(x)  x * TILE_SIZE //Array to World pos converter
+
+
+
+
+
+//SpawnWall(0.f, 0.f, FRotator(0.0f, 270.0f, 0.0f)); // Left
+//SpawnWall(500.f, 0.f, FRotator(0.0f, 0.0f, 0.0f)); // Up
+//SpawnWall(1000.f, 0.f, FRotator(0.0f, 180.0f, 0.0f)); // Down
+//SpawnWall(1500.f, 0.f, FRotator(0.0f, 90.0f, 0.0f)); // Right
+//SpawnWallCorner(0.f + 40.0f, 0.f + 40.0f, FRotator(0.0f, 270.0f, 0.0f)); // Down/Left
+//SpawnWallCorner(0.f - 40.0f, 0.f + 40.0f, FRotator(0.0f, 0.0f, 0.0f)); // Up/Left
+//SpawnWallCorner(0.f + 40.0f, 0.f - 40.0f, FRotator(0.0f, 180.0f, 0.0f)); // Down/Right
+//SpawnWallCorner(0.f - 40.0f, 0.f - 40.0f, FRotator(0.0f, 90.0f, 0.0f)); // Up/Right
