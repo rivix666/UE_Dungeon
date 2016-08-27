@@ -8,6 +8,9 @@
 #include <sstream>
 
 // TODO zrobic porz¹dek z kierunkami N ma byc do góry!!
+// std::wstringstream ws; //debug
+// ws << closed_dir;
+// OutputDebugString(ws.str().c_str());
 
 // Sets default values
 ADungeonGenerator::ADungeonGenerator() : 
@@ -38,20 +41,78 @@ void ADungeonGenerator::BeginPlay()
     carve_passage(1, 1);
 
 
+	//dead end test
+// 	PlacePassage(0.0, 0.0, N);
+// 	PlacePassage(5.0, 0.0, E);
+// 	PlacePassage(10.0, 0.0, S);
+// 	PlacePassage(15.0, 0.0, W);
 
-// 
+	// corridors test
+//   	PlacePassage(0, 0, N | E);
+//  // 	//PlacePassage(0, -2, N | S);
+//  // 	//PlacePassage(2, 0, W | E);
+//  	//PlacePassage(5.0, 0.0, S | E);
+//  	PlacePassage(5.0, 0.0, S | E);
+//  	PlacePassage(10.0, 0.0, W | S);
+//  	PlacePassage(15.0, 0.0, N | W);
 
-//  	PlacePassage(0.0, 0.0,  N | W);
-//     PlacePassage(5.0, 0.0,  E | N);
+	// cross road test
+// 	PlacePassage(0, 0, N | E | S | W);
+// 	PlacePassage(0, -2, N | S);
+// 	PlacePassage(0, 2, N | S);
+// 	PlacePassage(-2, 0, W | E);
+// 	PlacePassage(2, 0, W | E);
 
-   // PlacePassage(10.0, 0.0, S | E);
-  //  PlacePassage(15.0, 0.0, W | S);
-// 	PlacePassage(0.0, 0.0, S);
-// 	PlacePassage(0.0, 0.0, E);
-// 	PlacePassage(0.0, 0.0, W);
-// 	PlacePassage(0.0, 0.0, N | S | E | W);
-// 	PlacePassage(0.0, 0.0, N | S);
-// 	PlacePassage(0.0, 0.0, N | W);
+	// T cross test
+	//PlacePassage(0, 0, N | E | W);
+	////PlacePassage(-2, 0, W | E);
+	////PlacePassage(2, 0, W | E);
+	////PlacePassage(0, -2, N | S);
+	//PlacePassage(5, 0, S | E | W);
+	//PlacePassage(10, 0, E | S | N);
+	//PlacePassage(15, 0, W | S | N);
+
+	// Test mini korytarzyk
+	//////////////////////////////////////////////////////////////////////////
+ 	PlacePassage(0, 0, N | E | S | W);
+	PlacePassage(0, 2, N | S);
+	PlacePassage(-2, 0, W | E);
+	PlacePassage(2, 0, W | E);
+ 	PlacePassage(0, -2, N | S);
+
+ 	PlacePassage(0, -3, N | S);
+ 	PlacePassage(0, -4, N | S);
+ 	PlacePassage(0, -5, N | S);
+ 	PlacePassage(0, -7, N | W);
+ 	PlacePassage(2, -7, E | W);
+ 	PlacePassage(3, -7, E | W);
+ 	PlacePassage(5, -7, N | E);
+ 	PlacePassage(5, -5, N | S);
+ 	PlacePassage(5, -4, N | S);
+ 	PlacePassage(5, -3, N | S);
+ 	PlacePassage(5, -2, N | S);
+ 	PlacePassage(5, 0, N | E | W);
+ 	PlacePassage(3, 0, E | W);
+ 	PlacePassage(8, 0, E | N);
+	PlacePassage(8, 2, N | S);
+ 	PlacePassage(8, 4, E | S);
+	PlacePassage(6, 4, E | W);
+	PlacePassage(5, 4, E | W);
+	PlacePassage(4, 4, E | W);
+	PlacePassage(3, 4, E | W);
+	PlacePassage(2, 4, E | W);
+	PlacePassage(0, 4, W | S);
+	PlacePassage(-3, 0, E | W);
+	PlacePassage(-4, 0, W | E);
+	PlacePassage(-5, 0, E | W);
+	PlacePassage(-6, 0, W | E);
+	PlacePassage(-7, 0, E | W);
+	PlacePassage(-8, 0, W | E);
+	PlacePassage(-9, 0, E | W);
+	PlacePassage(-10, 0, W | E);
+	PlacePassage(-11, 0, E);
+	//////////////////////////////////////////////////////////////////////////
+
 
 	//PlaceWalls();
 }
@@ -77,20 +138,26 @@ void ADungeonGenerator::InitMazeArray()
 
 void ADungeonGenerator::InitDirectionArrays()
 {
-	m_DirXArr[N] = 0;
-	m_DirXArr[E] = 1;
-	m_DirXArr[S] = 0;
-	m_DirXArr[W] = -1;
+	m_DirXArr[1]  = -1;
+	m_DirXArr[N]  = 0;
+	m_DirXArr[E]  = 1;
+	m_DirXArr[S]  = 0;
+	m_DirXArr[W]  = -1;
+	m_DirXArr[32] = 0;
 
-	m_DirYArr[N] = -1;
-	m_DirYArr[E] = 0;
-	m_DirYArr[S] = 1;
-	m_DirYArr[W] = 0;
+	m_DirYArr[1]  = 0;
+	m_DirYArr[N]  = -1;
+	m_DirYArr[E]  = 0;
+	m_DirYArr[S]  = 1;
+	m_DirYArr[W]  = 0;
+	m_DirYArr[32] = -1;
 
-	m_DirOppositeArr[N] = S;
-	m_DirOppositeArr[E] = W;
-	m_DirOppositeArr[S] = N;
-	m_DirOppositeArr[W] = E;
+	m_DirOppositeArr[1]  = E;
+	m_DirOppositeArr[N]  = S;
+	m_DirOppositeArr[E]  = W;
+	m_DirOppositeArr[S]  = N;
+	m_DirOppositeArr[W]  = E;
+	m_DirOppositeArr[32] = S;
 }
 
 void ADungeonGenerator::ClearMazeArray()
@@ -418,16 +485,16 @@ void ADungeonGenerator::PlaceRoom(const SRoom& room)
 	// Place Room Corners
 	n0 = A2W((room.PosX - 1));
 	n1 = A2W((room.PosY - 1));
-	PlaceWallCorner(n0, n1, SW);
+	PlaceWallCorner(n0, n1, NW);
 	n0 = A2W((room.PosX - 1));
 	n1 = A2W((room.PosY + room.SizeY));
-	PlaceWallCorner(n0, n1, SE);
+	PlaceWallCorner(n0, n1, SW);
 	n0 = A2W((room.PosX + room.SizeX));
 	n1 = A2W((room.PosY - 1));
-	PlaceWallCorner(n0, n1, NW);
+	PlaceWallCorner(n0, n1, NE);
 	n0 = A2W((room.PosX + room.SizeX));
 	n1 = A2W((room.PosY + room.SizeY));
-	PlaceWallCorner(n0, n1, NE);
+	PlaceWallCorner(n0, n1, SE);
 
 	// Place Outside Doors
 	for (SDoor door : room.RoomDoors) //to do calkie inaczej to zrobic, ogolnie caly kod ten jest mega chujowy, nie podoba mis ie w chuj
@@ -436,23 +503,23 @@ void ADungeonGenerator::PlaceRoom(const SRoom& room)
 
 		if (door.OutsideDoorDir == N)
 		{
-			PlaceWallCorner(A2W((door.OutsideDoor.X - 1./*4*/)), A2W(door.OutsideDoor.Y), SW);
-			PlaceWallCorner(A2W((door.OutsideDoor.X + 1./*4*/)), A2W(door.OutsideDoor.Y), NW);
+			PlaceWallCorner(A2W((door.OutsideDoor.X - 1./*4*/)), A2W(door.OutsideDoor.Y), NW);
+			PlaceWallCorner(A2W((door.OutsideDoor.X + 1./*4*/)), A2W(door.OutsideDoor.Y), NE);
 		}
 		else if (door.OutsideDoorDir == S)
 		{
-			PlaceWallCorner(A2W((static_cast<float>(door.OutsideDoor.X) + 1./*4*/)), A2W(door.OutsideDoor.Y), NE);
-			PlaceWallCorner(A2W((static_cast<float>(door.OutsideDoor.X) - 1./*4*/)), A2W(door.OutsideDoor.Y), SE); //r
+			PlaceWallCorner(A2W((static_cast<float>(door.OutsideDoor.X) + 1./*4*/)), A2W(door.OutsideDoor.Y), SE);
+			PlaceWallCorner(A2W((static_cast<float>(door.OutsideDoor.X) - 1./*4*/)), A2W(door.OutsideDoor.Y), SW); //r
 		}
 		else if (door.OutsideDoorDir == W)
 		{
-			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) - 1./*4*/)), SW);
-			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) + 1./*4*/)), SE);
+			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) - 1./*4*/)), NW);
+			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) + 1./*4*/)), SW);
 		}
 		else
 		{
-			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) - 1./*4*/)), NW);
-			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) + 1./*4*/)), NE); //r
+			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) - 1./*4*/)), NE);
+			PlaceWallCorner(A2W(door.OutsideDoor.X), A2W((static_cast<float>(door.OutsideDoor.Y) + 1./*4*/)), SE); //r
 		}
 	}
 }
@@ -470,8 +537,10 @@ void ADungeonGenerator::PlacePassage(int x, int y, int dirs)
         PlaceCorridor(x, y, dirs);
 		break;
 	case 3:
+		PlaceTCrossRoad(x, y, dirs);
 		break;
 	case 4:
+		PlaceCrossRoad(x, y);
 		break;
 	default:
 		break;
@@ -480,153 +549,134 @@ void ADungeonGenerator::PlacePassage(int x, int y, int dirs)
 
 void ADungeonGenerator::PlaceCorridor(int x, int y, int open_dirs) //todo chujoza totalnie wymienic
 {
-    if (open_dirs & N)
-    {
-        if (open_dirs & S)
-        {
-            PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
-            PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
-        }
-        else
-        {
-            if (open_dirs & E)
-            {
-                PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
-                PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
-            }
-            else
-            {
-                PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
-                PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
-            }
-        }
-    }
-    else if (open_dirs & S)
-    {
-        if (open_dirs & N)
-        {
-            PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
-            PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
-        }
-        else
-        {
-            if (open_dirs & E)
-            {
-                PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
-                PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
-            }
-            else
-            {
-                PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
-                PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
-            }
-        }
-    }
-    else if (open_dirs & E)
-    {
-        if (open_dirs & W)
-        {
-            PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
-            PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
-        }
-        else
-        {
-            if (open_dirs & N)
-            {
-                PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
-                PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
-            }
-            else
-            {
-                PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
-                PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
-            }
-        }
-    }
-    else if (open_dirs & W)
-    {
-        if (open_dirs & E)
-        {
-            PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
-            PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
-        }
-        else
-        {
-            if (open_dirs & N)
-            {
-                PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
-                PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
-            }
-            else
-            {
-                PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
-                PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
-            }
-        }
-    }
+	int dir1 = 0;
+	int dir2 = 0;
+	for (int i = 0; i < 6; i++)
+	{
+		int temp_bit = (open_dirs >> i) & 1;
+		if (temp_bit != 0)
+		{
+			dir1 == 0 ? dir1 |= 1 << i : dir2 |= 1 << i;
+		}
+	}
+
+	if (m_DirOppositeArr[dir1] == dir2) // if straight corridor
+	{
+		int nd1 = dir1 >> 1;
+		int nd2 = dir2 >> 1;
+		PlaceWall(A2W((x + m_DirXArr[nd1])), A2W((y + m_DirYArr[nd1])), nd1, nullptr);
+		PlaceWall(A2W((x + m_DirXArr[nd2])), A2W((y + m_DirYArr[nd2])), nd2, nullptr);
+	}
+	else
+	{
+		/* Ten if jest spowodowany tym ze dir1 zawsze bedzie posiadal mniejsza wartosc, w przypadku zakretu N|W weszloby tutaj i bylo zle a powinno powyzej */
+		// todo znalezc sposob by to obejsc
+		if (dir1 == N && dir2 == W)
+		{
+			int nd1 = dir1;
+			int nd2 = dir2;
+			PlaceWall(A2W((x + m_DirXArr[nd1])), A2W((y + m_DirYArr[nd1])), nd1, nullptr);
+			PlaceWall(A2W((x + m_DirXArr[nd2])), A2W((y + m_DirYArr[nd2])), nd2, nullptr);
+			PlaceWallCorner(A2W((x + m_DirXArr[nd2])), A2W((y + m_DirYArr[nd1])), nd1, nullptr);
+			PlaceWallCorner(A2W((x + m_DirXArr[m_DirOppositeArr[nd2]])), A2W((y + m_DirYArr[m_DirOppositeArr[nd1]])), m_DirOppositeArr[nd1], &m_WallCorner2_Out);
+			PlaceWall(A2W((x + m_DirXArr[nd1 << 1])), A2W((y + m_DirYArr[nd1])), nd1, nullptr);
+			PlaceWall(A2W((x + m_DirXArr[nd2])), A2W((y + m_DirYArr[nd2 >> 1])), nd2, nullptr);
+		}
+		else  // todo fix that shit: we need to remove this fucking if
+		{
+			int nd1 = dir1 << 1;
+			int nd2 = dir2 >> 1;
+			PlaceWall(A2W((x + m_DirXArr[nd1])), A2W((y + m_DirYArr[nd1])), nd1, nullptr);
+			PlaceWall(A2W((x + m_DirXArr[nd2])), A2W((y + m_DirYArr[nd2])), nd2, nullptr);
+
+			if (dir1 == E || dir1 == W)
+			{
+	 			PlaceWallCorner(A2W((x + m_DirXArr[nd2])), A2W((y + m_DirYArr[nd1])), nd1, nullptr);
+	 			PlaceWallCorner(A2W((x + m_DirXArr[m_DirOppositeArr[nd2]])), A2W((y + m_DirYArr[m_DirOppositeArr[nd1]])), m_DirOppositeArr[nd1], &m_WallCorner2_Out);
+				PlaceWall(A2W((x + m_DirXArr[nd1 << 1])), A2W((y + m_DirYArr[nd1])), nd1, nullptr);
+				PlaceWall(A2W((x + m_DirXArr[nd2])), A2W((y + m_DirYArr[nd2 >> 1])), nd2, nullptr);
+			}
+			else
+			{
+				
+  				PlaceWallCorner(A2W((x + m_DirXArr[nd1])), A2W((y + m_DirYArr[nd2])), nd1, nullptr);
+  				PlaceWallCorner(A2W((x + m_DirXArr[m_DirOppositeArr[nd1]])), A2W((y + m_DirYArr[m_DirOppositeArr[nd2]])), m_DirOppositeArr[nd1], &m_WallCorner2_Out);
+				PlaceWall(A2W((x + m_DirXArr[nd1])), A2W((y + m_DirYArr[nd1 << 1])), nd1, nullptr);
+				PlaceWall(A2W((x + m_DirXArr[nd2 >> 1])), A2W((y + m_DirYArr[nd2])), nd2, nullptr);
+			}
+		}
+
+	}
 }
 
 void ADungeonGenerator::PlaceDeadEnd(int x, int y, int open_dir)
 {
     int d = m_DirOppositeArr[open_dir];
     int d1, d2;
-
-
-    // todo repair this shit
-    //////////////////////////////////////////////////////////////////////////
-    if (d == E || d == S)
-    {
-        d1 = d >> 1;
-        d2 = d << 1;
-
-        if (d == S) // todo zrobic inaczej calkiem bo chujowe a chodzi tylko o zamiane x,y d12, d
-        {
-            PlaceWallCorner(A2W((x + m_DirXArr[d1])), A2W((y + m_DirYArr[d])), (ECornerDir)d1, nullptr);
-            PlaceWallCorner(A2W((x + m_DirXArr[d2])), A2W((y + m_DirYArr[d])), (ECornerDir)d, nullptr);
-        }
-        else
-        {
-            PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d1])), (ECornerDir)d1, nullptr);
-            PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d2])), (ECornerDir)d, nullptr);
-        }
-    }
-    else
-    {
-        d1 = open_dir >> 1; // workaround cause EDir ends on 8 bits
-        d2 = open_dir << 1;
-
-        if (d == N) // todo zrobic inaczej calkiem bo chujowe a chodzi tylko o zamiane x,y d12, d
-        {
-            PlaceWallCorner(A2W((x + m_DirXArr[d1])), A2W((y + m_DirYArr[d])), (ECornerDir)d, nullptr);
-            PlaceWallCorner(A2W((x + m_DirXArr[d2])), A2W((y + m_DirYArr[d])), (ECornerDir)d2, nullptr);
-        }
-        else
-        {
-            PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d1])), (ECornerDir)d, nullptr);
-            PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d2])), (ECornerDir)d2, nullptr);
-        }
-    }
-    //////////////////////////////////////////////////////////////////////////
+    d1 = d >> 1;
+    d2 = d << 1;
 
     // place walls
     //////////////////////////////////////////////////////////////////////////
-    PlaceWall(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d])), (EDir)d, nullptr);
-    PlaceWall(A2W((x + m_DirXArr[d1])), A2W((y + m_DirYArr[d1])), (EDir)d1, nullptr);
-    PlaceWall(A2W((x + m_DirXArr[d2])), A2W((y + m_DirYArr[d2])), (EDir)d2, nullptr);
+    PlaceWall(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d])), d, nullptr);
+    PlaceWall(A2W((x + m_DirXArr[d1])), A2W((y + m_DirYArr[d1])), d1, nullptr);
+    PlaceWall(A2W((x + m_DirXArr[d2])), A2W((y + m_DirYArr[d2])), d2, nullptr);
+
+	// place corners
+	//////////////////////////////////////////////////////////////////////////
+	if (d == E || d == W) // todo fix that shit: we need to remove this fucking if
+	{
+		PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d1])), d, nullptr);
+		PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d2])), d2, nullptr);
+	}
+	else
+	{
+		PlaceWallCorner(A2W((x + m_DirXArr[d1])), A2W((y + m_DirYArr[d])), d, nullptr);
+		PlaceWallCorner(A2W((x + m_DirXArr[d2])), A2W((y + m_DirYArr[d])), d2, nullptr);
+	}
 }
 
 void ADungeonGenerator::PlaceCrossRoad(int x, int y)
 {
-
+	PlaceWallCorner(A2W((x + m_DirXArr[NE])), A2W((y + m_DirYArr[NE << 1])), SE, &m_WallCorner2_Out);
+	PlaceWallCorner(A2W((x + m_DirXArr[SE << 1])), A2W((y + m_DirYArr[SE])), SW, &m_WallCorner2_Out);
+	PlaceWallCorner(A2W((x + m_DirXArr[SW])), A2W((y + m_DirYArr[SW << 1])), NW, &m_WallCorner2_Out);
+	PlaceWallCorner(A2W((x + m_DirXArr[NW << 1])), A2W((y + m_DirYArr[NW])), NE, &m_WallCorner2_Out);
 }
 
 void ADungeonGenerator::PlaceTCrossRoad(int x, int y, int open_dirs)
 {
+	int closed_dir = 0;
+	for (int i = 1; i < 5; i++)
+	{
+		int temp_bit = (open_dirs >> i) & 1;
+		if (temp_bit == 0)
+		{
+			closed_dir |= 1 << i;
+		}
 
+		if (closed_dir == E || closed_dir == W)
+		{
+			PlaceWall(A2W((x + m_DirXArr[closed_dir])), A2W((y + m_DirYArr[closed_dir])), closed_dir, nullptr);
+			PlaceWall(A2W((x + m_DirXArr[closed_dir])), A2W((y + m_DirYArr[closed_dir >> 1])), closed_dir, nullptr);
+			PlaceWall(A2W((x + m_DirXArr[closed_dir])), A2W((y + m_DirYArr[closed_dir << 1])), closed_dir, nullptr);
+			PlaceWallCorner(A2W((x + m_DirXArr[m_DirOppositeArr[closed_dir]])), A2W((y + m_DirYArr[closed_dir >> 1])), closed_dir >> 1, &m_WallCorner2_Out);
+			PlaceWallCorner(A2W((x + m_DirXArr[m_DirOppositeArr[closed_dir]])), A2W((y + m_DirYArr[closed_dir << 1])), m_DirOppositeArr[closed_dir], &m_WallCorner2_Out);
+
+		}
+		else
+		{
+			PlaceWall(A2W((x + m_DirXArr[closed_dir])), A2W((y + m_DirYArr[closed_dir])), closed_dir, nullptr);
+			PlaceWall(A2W((x + m_DirXArr[closed_dir >> 1])), A2W((y + m_DirYArr[closed_dir])), closed_dir, nullptr);
+			PlaceWall(A2W((x + m_DirXArr[closed_dir << 1])), A2W((y + m_DirYArr[closed_dir])), closed_dir, nullptr);
+			PlaceWallCorner(A2W((x + m_DirXArr[closed_dir >> 1])), A2W((y + m_DirYArr[m_DirOppositeArr[closed_dir]])), closed_dir >> 1, &m_WallCorner2_Out);
+			PlaceWallCorner(A2W((x + m_DirXArr[closed_dir << 1])), A2W((y + m_DirYArr[m_DirOppositeArr[closed_dir]])), m_DirOppositeArr[closed_dir], &m_WallCorner2_Out);
+		}
+	}
 }
 
 // Walls
-void ADungeonGenerator::PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWall>* wall /*= nullptr*/)
+void ADungeonGenerator::PlaceWall(int x, int y, int dir, const TSubclassOf<AWall>* wall /*= nullptr*/)
 {
 	float fx = (float)x;
 	float fy = (float)y;
@@ -635,20 +685,32 @@ void ADungeonGenerator::PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWal
 	{
 	case N:
 		SpawnWall(fx, fy, FRotator::ZeroRotator, wall);
-		break;
+		return;
 	case S:
 		SpawnWall(fx, fy, FRotator(0.0f, 180.0f, 0.0f), wall);
-		break;
+		return;
 	case W:
 		SpawnWall(fx, fy, FRotator(0.0f, 270.0f, 0.0f), wall);
-		break;
+		return;
 	case E:
 		SpawnWall(fx, fy, FRotator(0.0f, 90.0f, 0.0f), wall);
-		break;
+		return;
+	}
+
+	if (dir == 1) // like w
+	{
+		SpawnWall(fx, fy, FRotator(0.0f, 270.0f, 0.0f), wall);
+		return;
+	}
+
+	if (dir == 32) // like n
+	{
+		SpawnWall(fx, fy, FRotator::ZeroRotator, wall);
+		return;
 	}
 }
 
-void ADungeonGenerator::PlaceWallCorner(int x, int y, ECornerDir dir, const TSubclassOf<AWall>* wall /*= nullptr*/)
+void ADungeonGenerator::PlaceWallCorner(int x, int y, int dir, const TSubclassOf<AWall>* wall /*= nullptr*/)
 {
 	float fx = (float)x;
 	float fy = (float)y;
@@ -656,17 +718,29 @@ void ADungeonGenerator::PlaceWallCorner(int x, int y, ECornerDir dir, const TSub
 	switch (dir)
 	{
 	case NW:
-		SpawnWallCorner(fx, fy, FRotator::ZeroRotator, wall);
-		break;
-	case NE:
-		SpawnWallCorner(fx, fy, FRotator(0.0f, 90.0f, 0.0f), wall);
-		break;
-	case SW:
 		SpawnWallCorner(fx, fy, FRotator(0.0f, 270.0f, 0.0f), wall);
-		break;
-	case SE:
+		return;
+	case NE:
+		SpawnWallCorner(fx, fy, FRotator::ZeroRotator, wall);
+		return;
+	case SW:
 		SpawnWallCorner(fx, fy, FRotator(0.0f, 180.0f, 0.0f), wall);
-		break;
+		return;
+	case SE:
+		SpawnWallCorner(fx, fy, FRotator(0.0f, 90.0f, 0.0f), wall);
+		return;
+	}
+
+	if (dir == 1) // like sw
+	{
+		SpawnWallCorner(fx, fy, FRotator(0.0f, 180.0f, 0.0f), wall);
+		return;
+	}
+
+	if (dir == 32) // like nw
+	{
+		SpawnWallCorner(fx, fy, FRotator(0.0f, 270.0f, 0.0f), wall);
+		return;
 	}
 }
 

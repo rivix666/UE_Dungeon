@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include <map>
 #include "GameFramework/Actor.h"
 #include "Wall.h"
 #include "Misc.h"
@@ -60,7 +60,7 @@ protected:
 
 	// Mesh Placers
 	void						PlaceRoom(const SRoom& room);
-	void						PlacePassage(int x, int y, int dirs);
+	void						PlacePassage(int x, int y, int dirs); // if turn/crossroad next block need to be set 2 spaces away | WE - X Axis, NS - Y Axis
 
 	// Corridors
 	void						PlaceCorridor(int x, int y, int open_dirs);
@@ -69,8 +69,8 @@ protected:
 	void						PlaceTCrossRoad(int x, int y, int open_dirs);
 
 	// Walls
-	void						PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWall>* wall = nullptr);
-	void						PlaceWallCorner(int x, int y, ECornerDir dir, const TSubclassOf<AWall>* wall = nullptr);
+	void						PlaceWall(int x, int y, int dir, const TSubclassOf<AWall>* wall = nullptr);
+	void						PlaceWallCorner(int x, int y, int dir, const TSubclassOf<AWall>* wall = nullptr);
 
 	// Spawners
 	AActor*						SpawnWall(float x, float y, FRotator rot, const TSubclassOf<AWall>* wall = nullptr);
@@ -93,9 +93,9 @@ private:
 
 	// Containers
 	int**                      m_MazeArr;
-	int                        m_DirXArr[9];
-	int                        m_DirYArr[9];
-	int                        m_DirOppositeArr[9];
+	std::map <int, int>        m_DirXArr;
+	std::map <int, int>        m_DirYArr;
+	std::map <int, int>        m_DirOppositeArr;
 
 	std::vector <SRoom>        m_RoomsVec;
 
