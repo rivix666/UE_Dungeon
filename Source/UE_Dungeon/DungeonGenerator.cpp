@@ -34,7 +34,18 @@ void ADungeonGenerator::BeginPlay()
 
 	SpawnPlayerInRoom(m_RoomsVec[0]);
 
-// 	PlacePassage(0.0, 0.0, N);
+
+    carve_passage(1, 1);
+
+
+
+// 
+
+//  	PlacePassage(0.0, 0.0,  N | W);
+//     PlacePassage(5.0, 0.0,  E | N);
+
+   // PlacePassage(10.0, 0.0, S | E);
+  //  PlacePassage(15.0, 0.0, W | S);
 // 	PlacePassage(0.0, 0.0, S);
 // 	PlacePassage(0.0, 0.0, E);
 // 	PlacePassage(0.0, 0.0, W);
@@ -453,8 +464,10 @@ void ADungeonGenerator::PlacePassage(int x, int y, int dirs)
 	switch (counter)
 	{
 	case 1:
+		PlaceDeadEnd(x, y, dirs);
 		break;
 	case 2:
+        PlaceCorridor(x, y, dirs);
 		break;
 	case 3:
 		break;
@@ -465,14 +478,141 @@ void ADungeonGenerator::PlacePassage(int x, int y, int dirs)
 	}
 }
 
-void ADungeonGenerator::PlaceCorridor(int x, int y, EDir open_dirs)
+void ADungeonGenerator::PlaceCorridor(int x, int y, int open_dirs) //todo chujoza totalnie wymienic
 {
-
+    if (open_dirs & N)
+    {
+        if (open_dirs & S)
+        {
+            PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
+            PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
+        }
+        else
+        {
+            if (open_dirs & E)
+            {
+                PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
+                PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
+            }
+            else
+            {
+                PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
+                PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
+            }
+        }
+    }
+    else if (open_dirs & S)
+    {
+        if (open_dirs & N)
+        {
+            PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
+            PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
+        }
+        else
+        {
+            if (open_dirs & E)
+            {
+                PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
+                PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
+            }
+            else
+            {
+                PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
+                PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
+            }
+        }
+    }
+    else if (open_dirs & E)
+    {
+        if (open_dirs & W)
+        {
+            PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
+            PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
+        }
+        else
+        {
+            if (open_dirs & N)
+            {
+                PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
+                PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
+            }
+            else
+            {
+                PlaceWall(A2W((x + m_DirXArr[W])), A2W((y + m_DirYArr[W])), (EDir)W, nullptr);
+                PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
+            }
+        }
+    }
+    else if (open_dirs & W)
+    {
+        if (open_dirs & E)
+        {
+            PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
+            PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
+        }
+        else
+        {
+            if (open_dirs & N)
+            {
+                PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
+                PlaceWall(A2W((x + m_DirXArr[S])), A2W((y + m_DirYArr[S])), (EDir)S, nullptr);
+            }
+            else
+            {
+                PlaceWall(A2W((x + m_DirXArr[E])), A2W((y + m_DirYArr[E])), (EDir)E, nullptr);
+                PlaceWall(A2W((x + m_DirXArr[N])), A2W((y + m_DirYArr[N])), (EDir)N, nullptr);
+            }
+        }
+    }
 }
 
-void ADungeonGenerator::PlaceDeadEnd(int x, int y, EDir open_dir)
+void ADungeonGenerator::PlaceDeadEnd(int x, int y, int open_dir)
 {
+    int d = m_DirOppositeArr[open_dir];
+    int d1, d2;
 
+
+    // todo repair this shit
+    //////////////////////////////////////////////////////////////////////////
+    if (d == E || d == S)
+    {
+        d1 = d >> 1;
+        d2 = d << 1;
+
+        if (d == S) // todo zrobic inaczej calkiem bo chujowe a chodzi tylko o zamiane x,y d12, d
+        {
+            PlaceWallCorner(A2W((x + m_DirXArr[d1])), A2W((y + m_DirYArr[d])), (ECornerDir)d1, nullptr);
+            PlaceWallCorner(A2W((x + m_DirXArr[d2])), A2W((y + m_DirYArr[d])), (ECornerDir)d, nullptr);
+        }
+        else
+        {
+            PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d1])), (ECornerDir)d1, nullptr);
+            PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d2])), (ECornerDir)d, nullptr);
+        }
+    }
+    else
+    {
+        d1 = open_dir >> 1; // workaround cause EDir ends on 8 bits
+        d2 = open_dir << 1;
+
+        if (d == N) // todo zrobic inaczej calkiem bo chujowe a chodzi tylko o zamiane x,y d12, d
+        {
+            PlaceWallCorner(A2W((x + m_DirXArr[d1])), A2W((y + m_DirYArr[d])), (ECornerDir)d, nullptr);
+            PlaceWallCorner(A2W((x + m_DirXArr[d2])), A2W((y + m_DirYArr[d])), (ECornerDir)d2, nullptr);
+        }
+        else
+        {
+            PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d1])), (ECornerDir)d, nullptr);
+            PlaceWallCorner(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d2])), (ECornerDir)d2, nullptr);
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+
+    // place walls
+    //////////////////////////////////////////////////////////////////////////
+    PlaceWall(A2W((x + m_DirXArr[d])), A2W((y + m_DirYArr[d])), (EDir)d, nullptr);
+    PlaceWall(A2W((x + m_DirXArr[d1])), A2W((y + m_DirYArr[d1])), (EDir)d1, nullptr);
+    PlaceWall(A2W((x + m_DirXArr[d2])), A2W((y + m_DirYArr[d2])), (EDir)d2, nullptr);
 }
 
 void ADungeonGenerator::PlaceCrossRoad(int x, int y)
@@ -480,7 +620,7 @@ void ADungeonGenerator::PlaceCrossRoad(int x, int y)
 
 }
 
-void ADungeonGenerator::PlaceTCrossRoad(int x, int y, EDir open_dirs)
+void ADungeonGenerator::PlaceTCrossRoad(int x, int y, int open_dirs)
 {
 
 }
@@ -608,4 +748,58 @@ int ADungeonGenerator::NumberOfSetBits(int i)
 	i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
 	return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
 }
+
+int ADungeonGenerator::shuffle_array(int *arr, int size)
+{
+    int i;
+
+    for (i = 0; i < (size - 1); i++) {
+        int r = i + (rand() % (size - i));
+        int temp = arr[i];
+        arr[i] = arr[r];
+        arr[r] = temp;
+    }
+    return 0;
+}
+
+int ADungeonGenerator::carve_passage(int cx, int cy)
+{
+
+    int dx, dy, nx, ny;
+    int directions[4] = { N, E, S, W };
+
+    //shuffle the direction array
+    int i;
+
+    for (i = 0; i < (4 - 1); i++) {
+        int r = i + (rand() % (4 - i));
+        int temp = directions[i];
+        directions[i] = directions[r];
+        directions[r] = temp;
+    }
+
+    //iterates through the direction then test if the cell in that direction is valid and
+    //within the bounds of the maze
+    for (i = 0; i < 4; i++) {
+        dx = m_DirXArr[directions[i]];
+        dy = m_DirYArr[directions[i]];
+
+        // check if the cell is valid
+        nx = cx + dx;
+        ny = cy + dy;
+        // check if we are on valid grid
+        if (((nx < m_MaxWidth) & (nx >= 0)) & ((ny < m_MaxHeight) & (ny >= 0))) {
+            //check if grid is not visited
+            if (m_MazeArr[nx][ny] == 0) {
+                m_MazeArr[cx][cy] = (int)((int)m_MazeArr[cx][cy] | (int)directions[i]);
+                m_MazeArr[nx][ny] = (int)((int)m_MazeArr[nx][ny] | (int)m_DirOppositeArr[directions[i]]);
+                carve_passage(nx, ny);
+            }
+        }
+
+    }
+    return 0;
+}
+
+
 

@@ -7,18 +7,18 @@ typedef unsigned int uint;
 //////////////////////////////////////////////////////////////////////////
 enum EDir
 {
-	N = 1,
-	S = 2,
+	N = 2,
 	E = 4,
-	W = 8
+	S = 8,
+	W = 16
 };
 
 enum ECornerDir
 {
-	NW = 1,
-	NE = 2,
-	SW = 4,
+	NW = 2,
+	NE = 4,
 	SE = 8,
+	SW = 16,
 };
 
 enum ETileType

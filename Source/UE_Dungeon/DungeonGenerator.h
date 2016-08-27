@@ -63,10 +63,10 @@ protected:
 	void						PlacePassage(int x, int y, int dirs);
 
 	// Corridors
-	void						PlaceCorridor(int x, int y, EDir open_dirs);
-	void						PlaceDeadEnd(int x, int y, EDir open_dir);
+	void						PlaceCorridor(int x, int y, int open_dirs);
+	void						PlaceDeadEnd(int x, int y, int open_dir);
 	void						PlaceCrossRoad(int x, int y);
-	void						PlaceTCrossRoad(int x, int y, EDir open_dirs);
+	void						PlaceTCrossRoad(int x, int y, int open_dirs);
 
 	// Walls
 	void						PlaceWall(int x, int y, EDir dir, const TSubclassOf<AWall>* wall = nullptr);
@@ -80,6 +80,10 @@ protected:
 
 	// Others
 	int							NumberOfSetBits(int i);
+
+    int shuffle_array(int *arr, int size);
+    int carve_passage(int cx, int cy);
+
 
 private:
 	int                        m_MaxWidth;
