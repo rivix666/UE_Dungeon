@@ -23,11 +23,11 @@ enum ECornerDir
 
 enum ETileType
 {
-	Nothing = 1,
-	SolidRock = 2,
-	Room = 4,
-	Corridor = 8,
-	Doors = 16,
+	Nothing = 64,
+	SolidRock = 128,
+	Room = 256,
+	Corridor = 512,
+	Doors = 1024,
 };
 
 // Structs

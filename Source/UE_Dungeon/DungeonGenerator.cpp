@@ -14,7 +14,7 @@
 
 // Sets default values
 ADungeonGenerator::ADungeonGenerator() : 
-	m_MaxWidth(50), m_MaxHeight(50), 
+	m_MaxWidth(10), m_MaxHeight(10), 
 	m_TorchIncrementator(0),
 	m_TorchModulo(FMath::RandRange(3, 8))
 {
@@ -28,14 +28,16 @@ void ADungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 	ClearMazeArray();
-	GenRooms(50, true);
+	//GenRooms(50, true);
+
+
 //	RemoveUnnecessaryTiles();
 
 
-	for(SRoom room : m_RoomsVec)
-		PlaceRoom(room);
+	//for(SRoom room : m_RoomsVec)
+	//	PlaceRoom(room);
 
-	SpawnPlayerInRoom(m_RoomsVec[0]);
+	//SpawnPlayerInRoom(m_RoomsVec[0]);
 
 
     carve_passage(1, 1);
@@ -74,44 +76,61 @@ void ADungeonGenerator::BeginPlay()
 
 	// Test mini korytarzyk
 	//////////////////////////////////////////////////////////////////////////
- 	PlacePassage(0, 0, N | E | S | W);
-	PlacePassage(0, 2, N | S);
-	PlacePassage(-2, 0, W | E);
-	PlacePassage(2, 0, W | E);
- 	PlacePassage(0, -2, N | S);
-
- 	PlacePassage(0, -3, N | S);
- 	PlacePassage(0, -4, N | S);
- 	PlacePassage(0, -5, N | S);
- 	PlacePassage(0, -7, N | W);
- 	PlacePassage(2, -7, E | W);
- 	PlacePassage(3, -7, E | W);
- 	PlacePassage(5, -7, N | E);
- 	PlacePassage(5, -5, N | S);
- 	PlacePassage(5, -4, N | S);
- 	PlacePassage(5, -3, N | S);
- 	PlacePassage(5, -2, N | S);
- 	PlacePassage(5, 0, N | E | W);
- 	PlacePassage(3, 0, E | W);
- 	PlacePassage(8, 0, E | N);
-	PlacePassage(8, 2, N | S);
- 	PlacePassage(8, 4, E | S);
-	PlacePassage(6, 4, E | W);
-	PlacePassage(5, 4, E | W);
-	PlacePassage(4, 4, E | W);
-	PlacePassage(3, 4, E | W);
-	PlacePassage(2, 4, E | W);
-	PlacePassage(0, 4, W | S);
-	PlacePassage(-3, 0, E | W);
-	PlacePassage(-4, 0, W | E);
-	PlacePassage(-5, 0, E | W);
-	PlacePassage(-6, 0, W | E);
-	PlacePassage(-7, 0, E | W);
-	PlacePassage(-8, 0, W | E);
-	PlacePassage(-9, 0, E | W);
-	PlacePassage(-10, 0, W | E);
-	PlacePassage(-11, 0, E);
+//  	PlacePassage(0, 0, N | E | S | W);
+// 	PlacePassage(0, 2, N | S);
+// 	PlacePassage(-2, 0, W | E);
+// 	PlacePassage(2, 0, W | E);
+//  	PlacePassage(0, -2, N | S);
+// 
+//  	PlacePassage(0, -3, N | S);
+//  	PlacePassage(0, -4, N | S);
+//  	PlacePassage(0, -5, N | S);
+//  	PlacePassage(0, -7, N | W);
+//  	PlacePassage(2, -7, E | W);
+//  	PlacePassage(3, -7, E | W);
+//  	PlacePassage(5, -7, N | E);	// yo zwyrolu :P, obczaj to 
+//  	PlacePassage(5, -5, N | S); // przy pomocy tego zrobimy maly korytarzo labiryncik :D
+//  	PlacePassage(5, -4, N | S);
+//  	PlacePassage(5, -3, N | S);
+//  	PlacePassage(5, -2, N | S);
+//  	PlacePassage(5, 0, N | E | W);
+//  	PlacePassage(3, 0, E | W);
+//  	PlacePassage(8, 0, E | N);
+// 	PlacePassage(8, 2, N | S);
+//  	PlacePassage(8, 4, E | S);
+// 	PlacePassage(6, 4, E | W);
+// 	PlacePassage(5, 4, E | W);
+// 	PlacePassage(4, 4, E | W);
+// 	PlacePassage(3, 4, E | W);
+// 	PlacePassage(2, 4, E | W);
+// 	PlacePassage(0, 4, W | S);
+// 	PlacePassage(-3, 0, E | W);
+// 	PlacePassage(-4, 0, W | E);
+// 	PlacePassage(-5, 0, E | W);
+// 	PlacePassage(-6, 0, W | E);
+// 	PlacePassage(-7, 0, E | W);
+// 	PlacePassage(-8, 0, W | E);
+// 	PlacePassage(-9, 0, E | W);
+// 	PlacePassage(-10, 0, W | E);
+// 	PlacePassage(-11, 0, E);
 	//////////////////////////////////////////////////////////////////////////
+
+// 	for (int i = 0; i < m_MaxWidth; i++)
+// 	{
+// 		for (int j = 0; j < m_MaxHeight; j++)
+// 		{
+// 			std::wstringstream ws;
+// 			ws << m_MazeArr[i][j] << "|";
+// 			OutputDebugString(ws.str().c_str());
+// 			if (m_MazeArr[i][j] != Room)
+// 				if (m_MazeArr[i][j])
+// 				PlacePassage(i, j, m_MazeArr[i][j]);
+// 		}
+// 		std::wstringstream ws;
+// 		ws <<  "\n";
+// 		OutputDebugString(ws.str().c_str());
+// 	}
+// 
 
 
 	//PlaceWalls();
@@ -166,7 +185,7 @@ void ADungeonGenerator::ClearMazeArray()
 	{
 		for (int j = 0; j < m_MaxHeight; j++)
 		{
-			m_MazeArr[i][j] = SolidRock;
+			m_MazeArr[i][j] = 0;//SolidRock todo obadac
 		}
 	}
 
@@ -861,6 +880,7 @@ int ADungeonGenerator::carve_passage(int cx, int cy)
         // check if the cell is valid
         nx = cx + dx;
         ny = cy + dy;
+
         // check if we are on valid grid
         if (((nx < m_MaxWidth) & (nx >= 0)) & ((ny < m_MaxHeight) & (ny >= 0))) {
             //check if grid is not visited
