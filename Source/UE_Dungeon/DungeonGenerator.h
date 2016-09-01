@@ -46,6 +46,7 @@ protected:
 	void                        ShuffleDirArray(int* arr, int size);
 
 	// Dungeon Generation 
+	//////////////////////////////////////////////////////////////////////////
 	void                        GenRooms(int attempts, bool first = false);
 	void						AddDoors(int x, int y, EDir dir, SRoom& room);
 	void						CreateDoors(SRoom& room);
@@ -58,7 +59,12 @@ protected:
 	int                         IsThereAnyNeighbour(int x, int y, int type);
 	bool                        AreFieldsEmpty(int x, int y, int size_x, int size_y);
 
+	void						GenerateMinimumSpanningTree();
+	void						CreatePathsBetweenRooms();
+	void						FindAStarPaths(const SDoor& d1, const SDoor& d2);
+
 	// Mesh Placers
+	//////////////////////////////////////////////////////////////////////////
 	void						PlaceRoom(const SRoom& room);
 	void						PlacePassage(int x, int y, int dirs); // if turn/crossroad next block need to be set 2 spaces away | WE - X Axis, NS - Y Axis
 
@@ -103,4 +109,9 @@ private:
 	uint					   m_TorchModulo;
 
 
+
+
+
+
+	void                        GenMazeRecursiveBacktracking(int pos_x, int pos_y);
 };

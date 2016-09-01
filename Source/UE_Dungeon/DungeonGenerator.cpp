@@ -14,7 +14,7 @@
 
 // Sets default values
 ADungeonGenerator::ADungeonGenerator() : 
-	m_MaxWidth(10), m_MaxHeight(10), 
+	m_MaxWidth(50), m_MaxHeight(50), 
 	m_TorchIncrementator(0),
 	m_TorchModulo(FMath::RandRange(3, 8))
 {
@@ -28,19 +28,19 @@ void ADungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 	ClearMazeArray();
-	//GenRooms(50, true);
+	GenRooms(50, true);
 
 
-//	RemoveUnnecessaryTiles();
+	RemoveUnnecessaryTiles();
+
+	for(SRoom room : m_RoomsVec)
+		PlaceRoom(room);
 
 
-	//for(SRoom room : m_RoomsVec)
-	//	PlaceRoom(room);
+	GenerateMinimumSpanningTree();
+	FindAStarPaths(m_RoomsVec[1].RoomDoors[1], *m_RoomsVec[1].RoomDoors[1].SpanningTreeDoor);
 
-	//SpawnPlayerInRoom(m_RoomsVec[0]);
-
-
-    carve_passage(1, 1);
+  //  carve_passage(1, 1);
 
 
 	//dead end test
@@ -97,7 +97,7 @@ void ADungeonGenerator::BeginPlay()
 //  	PlacePassage(3, 0, E | W);
 //  	PlacePassage(8, 0, E | N);
 // 	PlacePassage(8, 2, N | S);
-//  	PlacePassage(8, 4, E | S);
+//  PlacePassage(8, 4, E | S);
 // 	PlacePassage(6, 4, E | W);
 // 	PlacePassage(5, 4, E | W);
 // 	PlacePassage(4, 4, E | W);
@@ -115,25 +115,27 @@ void ADungeonGenerator::BeginPlay()
 // 	PlacePassage(-11, 0, E);
 	//////////////////////////////////////////////////////////////////////////
 
-// 	for (int i = 0; i < m_MaxWidth; i++)
-// 	{
-// 		for (int j = 0; j < m_MaxHeight; j++)
-// 		{
-// 			std::wstringstream ws;
-// 			ws << m_MazeArr[i][j] << "|";
-// 			OutputDebugString(ws.str().c_str());
-// 			if (m_MazeArr[i][j] != Room)
-// 				if (m_MazeArr[i][j])
-// 				PlacePassage(i, j, m_MazeArr[i][j]);
-// 		}
-// 		std::wstringstream ws;
-// 		ws <<  "\n";
-// 		OutputDebugString(ws.str().c_str());
-// 	}
-// 
+ 	for (int i = 0; i < m_MaxWidth; i++)
+ 	{
+ 		for (int j = 0; j < m_MaxHeight; j++)
+ 		{
+ 			std::wstringstream ws;
+ 			ws << m_MazeArr[i][j] << "|";
+ 			OutputDebugString(ws.str().c_str());
+ 			if (m_MazeArr[i][j] != Room)
+ 				if (m_MazeArr[i][j])
+ 				PlacePassage(i, j, m_MazeArr[i][j]);
+ 		}
+ 		std::wstringstream ws;
+ 		ws <<  "\n";
+ 		OutputDebugString(ws.str().c_str());
+ 	}
+ 
 
 
 	//PlaceWalls();
+
+	SpawnPlayerInRoom(m_RoomsVec[0]);
 }
 
 // Called every frame
@@ -185,7 +187,7 @@ void ADungeonGenerator::ClearMazeArray()
 	{
 		for (int j = 0; j < m_MaxHeight; j++)
 		{
-			m_MazeArr[i][j] = 0;//SolidRock todo obadac
+			m_MazeArr[i][j] = SolidRock; //0;//SolidRock todo obadac
 		}
 	}
 
@@ -316,6 +318,15 @@ void ADungeonGenerator::CreateDoors(SRoom& room)
 
 		if (m_MazeArr[nx][ny] == Doors) // if there are doors, repeat and find another spot
 			continue;
+		if (m_MazeArr[nx+1][ny] == Doors) // if there are doors, repeat and find another spot
+			continue;
+		if (m_MazeArr[nx-1][ny] == Doors) // if there are doors, repeat and find another spot
+			continue;
+		if (m_MazeArr[nx][ny+1] == Doors) // if there are doors, repeat and find another spot
+			continue;
+		if (m_MazeArr[nx][ny-1] == Doors) // if there are doors, repeat and find another spot
+			continue;
+
 
 		AddDoors(nx, ny, dir, room); // add doors
 
@@ -473,6 +484,273 @@ bool ADungeonGenerator::AreFieldsEmpty(int x, int y, int size_x, int size_y)
 	}
 
 	return true;
+}
+
+void ADungeonGenerator::GenerateMinimumSpanningTree()
+{
+	int rooms_count = m_RoomsVec.size();
+	for (int i = 0; i < rooms_count; i++)
+	{
+		for (SDoor& d : m_RoomsVec[i].RoomDoors)
+		{
+// 			if (d.SpanningTreeDoor)
+// 				continue;
+
+			float distance = 100000000.0;
+
+			for (int j = i + 1; j < rooms_count; j++)
+			{
+				for (SDoor& d2 : m_RoomsVec[j].RoomDoors)
+				{
+					float temp = FVector2D::Distance(d.OutsideDoor, d2.OutsideDoor);
+					if (temp < distance)
+					{
+						distance = temp;
+						d.SpanningLength = temp;
+						d2.SpanningLength = temp;
+
+// 						if (d.SpanningTreeDoor)
+// 							d.SpanningTreeDoor->SpanningTreeDoor = nullptr;
+
+						d.SpanningTreeDoor = &d2;
+						d2.SpanningTreeDoor = &d;
+					}
+				}
+			}
+		}
+	}
+
+	//#DEBUG_CLEAN
+// 	for (int i = 0; i < rooms_count; i++)
+// 	{
+// 		int count = 0;
+// 		for (SDoor d : m_RoomsVec[i].RoomDoors)
+// 		{
+// 			count++;
+// 			std::wstringstream ws;
+// 			ws << count << ". " << d.SpanningLength;
+// 
+// 			if (!d.SpanningTreeDoor)
+// 			{
+// 				ws << " szatan";				
+// 			}
+// 
+// 			OutputDebugString(ws.str().c_str());
+// 		}
+// 	}
+}
+
+void ADungeonGenerator::CreatePathsBetweenRooms()
+{
+	for (int i = 0; i < m_RoomsVec.size(); i++)
+	{
+		for (const SDoor& d : m_RoomsVec[i].RoomDoors)
+		{
+			if (!d.SpanningTreeDoor)
+				continue;
+
+			FindAStarPaths(d, *d.SpanningTreeDoor);
+		}
+	}
+}
+
+void ADungeonGenerator::FindAStarPaths(const SDoor& d1, const SDoor& d2)
+{
+// 	int odir = d1.InsideDoorDir;
+// 	int ndir = d1.OutsideDoorDir;
+ 	int x = (int)d1.OutsideDoor.X + m_DirXArr[d1.InsideDoorDir];
+	int y = (int)d1.OutsideDoor.Y + m_DirYArr[d1.InsideDoorDir];
+	m_MazeArr[x][y] = d1.InsideDoorDir | d1.OutsideDoorDir;
+ 	int dest_x = (int)d2.OutsideDoor.X;
+ 	int dest_y = (int)d2.OutsideDoor.Y;
+ 	float path_sum = 0;
+ 	std::vector <SAPath*> ends;
+// 	ends.push_back(new SAPath(x + m_DirXArr[ndir], y + m_DirYArr[ndir], 0.0, 0.0, odir, ndir));
+// 	SAPath* path = ends[0];
+// 
+	int best_idx = 0;
+ 	int kaczka = 0;
+	int last_dir = d1.InsideDoorDir;
+	while (x != dest_x && y != dest_x)
+	{
+		int dirs = (N | E | S | W) & ~last_dir;
+		for (int i = 1; i < 5; i++)
+		{
+			int cur_dir = 0;
+			int tx, ty;
+
+			if (((dirs >> i) & 1) != 0)
+			{
+				cur_dir |= 1 << i;
+// 				tx = x + m_DirXArr[cur_dir];
+// 				ty = y + m_DirYArr[cur_dir];
+// 				if (m_MazeArr[tx][ty] == Room)
+// 					continue;
+// 				float templ = FVector2D::Distance(FVector2D((float)A2W(tx), (float)A2W(ty)), d2.OutsideDoor);
+// 				float temps = FVector2D::Distance(FVector2D((float)A2W(tx), (float)A2W(ty)), FVector2D((float)A2W(x), (float)A2W(y)));
+// 
+// 				if(ends.size() > 0)
+// 				ends.push_back(new SAPath(tx, ty, temps, templ, last_dir, cur_dir, ends[best_idx]->path_sum + temps));
+// 				else
+// 					ends.push_back(new SAPath(tx, ty, temps, templ, last_dir, cur_dir, temps));
+
+
+
+				if (cur_dir == m_DirOppositeArr[last_dir])
+				{
+					tx = x + m_DirXArr[cur_dir];
+					ty = y + m_DirYArr[cur_dir];
+					if (m_MazeArr[tx][ty] == Room)
+						continue;
+
+					// 					if (m_MazeArr[tx][ty] == Doors)
+					// 					{
+					// 
+					// 						m_MazeArr[tx][ty] = odir | cur_dir;
+					// 						return;
+					// 					}
+
+
+					float templ = FVector2D::Distance(FVector2D((float)A2W(tx), (float)A2W(ty)), d2.OutsideDoor);
+					float temps = FVector2D::Distance(FVector2D((float)A2W(tx), (float)A2W(ty)), FVector2D((float)A2W(x), (float)A2W(y)));
+					if (ends.size() > 0)
+					ends.push_back(new SAPath(tx, ty, tx, ty, temps, templ, last_dir, cur_dir, ends[best_idx]->path_sum + temps));
+					else
+						ends.push_back(new SAPath(tx, ty, tx, ty, temps, templ, last_dir, cur_dir, temps));
+				}
+				else
+				{
+					tx = x + m_DirXArr[m_DirOppositeArr[last_dir]];
+					ty = y + m_DirYArr[m_DirOppositeArr[last_dir]];
+
+					if (m_MazeArr[tx][ty] == Room)
+						continue;
+
+					int tx2 = tx + m_DirXArr[cur_dir];
+					int ty2 = ty + m_DirYArr[cur_dir];
+					if (m_MazeArr[tx2][ty2] == Room)
+						continue;
+
+					float templ = FVector2D::Distance(FVector2D((float)A2W(tx2), (float)A2W(ty2)), d2.OutsideDoor);
+					float temps = FVector2D::Distance(FVector2D((float)A2W(tx2), (float)A2W(ty2)), FVector2D((float)A2W(x), (float)A2W(y)));
+					if (ends.size() > 0)
+					ends.push_back(new SAPath(tx, ty, tx2, ty2, temps, templ, last_dir, cur_dir, ends[best_idx]->path_sum + temps));
+					else
+						ends.push_back(new SAPath(tx, ty, tx2, ty2, temps, templ, last_dir, cur_dir,  temps));
+				}
+			}
+		}
+
+
+		float best = 10000000000.;
+		for (int i = 0; i < ends.size(); i++) //todo wiesz co z tym zrobic na jutro wasc
+		{
+			float temp = ends[i]->Sum + ends[i]->Length + ends[best_idx]->path_sum;
+			if (temp < best)
+			{
+				best = temp;
+				best_idx = i;
+			}
+		}
+
+		if (ends.size() < 1)
+			return;
+
+		x = ends[best_idx]->nx;
+		y = ends[best_idx]->ny;
+		m_MazeArr[ends[best_idx]->X][ends[best_idx]->Y] = 0;
+		m_MazeArr[ends[best_idx]->X][ends[best_idx]->Y] |= ends[best_idx]->cur_dir | ends[best_idx]->old_dir;
+		last_dir = ends[best_idx]->cur_dir;
+
+		ends[best_idx]->Sum = 10000000.0;
+
+		kaczka++;
+		if (kaczka == 200) return;
+
+
+		// 		odir = m_DirOppositeArr[path->cur_dir];
+// 		ndir = (N | E | S | W) & ~odir;
+// 		for (int i = 1; i < 5; i++)
+// 		{
+// 			int cur_dir = 0;
+// 			int tx, ty;
+// 
+// 			if (((ndir >> i) & 1) != 0)
+// 			{
+// 				cur_dir |= 1 << i;
+// 				if (cur_dir == path->cur_dir)
+// 				{
+// 					tx = x + m_DirXArr[cur_dir];
+// 					ty = y + m_DirYArr[cur_dir];
+// 					if (m_MazeArr[tx][ty] == Room)
+// 						continue;
+// 
+// // 					if (m_MazeArr[tx][ty] == Doors)
+// // 					{
+// // 
+// // 						m_MazeArr[tx][ty] = odir | cur_dir;
+// // 						return;
+// // 					}
+// 
+// 
+// 					float templ = FVector2D::Distance(FVector2D((float)A2W(tx), (float)A2W(ty)), d2.OutsideDoor);
+// 					float temps = FVector2D::Distance(FVector2D((float)A2W(tx), (float)A2W(ty)), FVector2D((float)x, (float)y));
+// 					ends.push_back(new SAPath(tx, ty, temps, templ, odir, cur_dir, path));
+// 				}
+// 				else
+// 				{
+// 					tx = x + m_DirXArr[odir];
+// 					ty = y + m_DirYArr[odir];
+// 
+// 					if (m_MazeArr[tx][ty] == Room)
+// 						continue;
+// 
+// //  					tx += m_DirXArr[path->cur_dir];
+// //  					ty += m_DirYArr[path->cur_dir];
+// //  
+// //  					if (m_MazeArr[tx][ty] == Room)
+// //  						continue;
+// 
+// 					int tx2 = tx + m_DirXArr[cur_dir];
+// 					int ty2 = ty + m_DirYArr[cur_dir];
+// 					if (m_MazeArr[tx2][ty2] == Room)
+// 						continue;
+// 
+// // 					if (m_MazeArr[tx2][ty2] == Doors)
+// // 					{
+// // 
+// // 						m_MazeArr[tx2][ty2] = odir | cur_dir;
+// // 						return;
+// // 					}
+// 
+// 					float templ = FVector2D::Distance(FVector2D((float)A2W(tx), (float)A2W(ty)), d2.OutsideDoor);
+// 					float temps = FVector2D::Distance(FVector2D((float)A2W(tx), (float)A2W(ty)), FVector2D((float)x, (float)y));
+// 					ends.push_back(new SAPath(tx, ty, path->Sum + temps, templ, path->cur_dir, cur_dir, path));
+// 				}
+// 			}
+// 		}
+// 
+// 		float best = 10000000000.; 
+// 		int best_idx;
+// 		for (int i = 0; i < ends.size(); i++) //todo wiesz co z tym zrobic na jutro wasc
+// 		{
+// 			float temp = /*ends[i].Sum +*/ ends[i]->Length;
+// 			if (temp < best)
+// 			{
+// 				best = temp;
+// 				best_idx = i;
+// 			}
+// 		}
+// 
+// 
+// 		x = ends[best_idx]->X;
+// 		y = ends[best_idx]->Y;
+// 		path = ends[best_idx];
+// 		m_MazeArr[ends[best_idx]->X][ends[best_idx]->Y] = ends[best_idx]->cur_dir | ends[best_idx]->old_dir;
+// 
+// 		kaczka++;
+// 		if (kaczka == 200) return;
+ 	}
 }
 
 // Mesh Placer
@@ -895,5 +1173,31 @@ int ADungeonGenerator::carve_passage(int cx, int cy)
     return 0;
 }
 
+void ADungeonGenerator::GenMazeRecursiveBacktracking(int pos_x, int pos_y)
+{
+	int nx, ny;
+	int directions[4]{ N, S, E, W };
+	for (int i = 0; i < 100; i++)
+	{
+		ShuffleDirArray(directions, 4);
+		for (int dir : directions)
+		{
+			nx = pos_x + m_DirXArr[dir];
+			ny = pos_y + m_DirYArr[dir];
+
+			if (((nx < m_MaxWidth - 1) & (nx >= 1)) & ((ny < m_MaxHeight - 1) & (ny >= 1)))
+			{
+				if (m_MazeArr[nx][ny] == SolidRock)
+				{
+					if (CheckNeighbours(dir, nx, ny) > 2) // 2 with cross walls //with this type we have more open spaces
+					{
+						m_MazeArr[nx][ny] = Corridor;
+						GenMazeRecursiveBacktracking(nx, ny);
+					}
+				}
+			}
+		}
+	}
+}
 
 

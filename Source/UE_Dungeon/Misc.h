@@ -67,22 +67,27 @@ struct SDoor
 	FVector2D OutsideDoor;
 	EDir InsideDoorDir;
 	EDir OutsideDoorDir;
+	SDoor* SpanningTreeDoor;
+	float  SpanningLength;
 
 	SDoor() :
 		InsideDoor(FVector2D(0.0f, 0.0f)),
 		OutsideDoor(FVector2D(0.0f, 0.0f)),
 		InsideDoorDir(N),
-		OutsideDoorDir(S) {}
+		OutsideDoorDir(S),
+		SpanningTreeDoor(nullptr) {}
 
 	SDoor(FVector2D in, FVector2D out, EDir in_d, EDir out_d) :
 		InsideDoor(in),
 		OutsideDoor(out),
 		InsideDoorDir(in_d),
-		OutsideDoorDir(out_d) {}
+		OutsideDoorDir(out_d),
+		SpanningTreeDoor(nullptr) {}
 
 	SDoor(FVector2D in, EDir in_d) :
 		InsideDoor(in),
-		InsideDoorDir(in_d)
+		InsideDoorDir(in_d),
+		SpanningTreeDoor(nullptr)
 	{
 		switch (in_d)
 		{
@@ -132,6 +137,29 @@ struct SRoom
 		result = result && (SizeY == r.SizeY);
 		return result;
 	}
+};
+
+struct SAPath
+{
+	int X;
+	int Y;
+	int nx;
+	int ny;
+	float Sum;
+	float Length; // Straight langth
+	int old_dir = 0;
+	int cur_dir = 0;
+	SAPath* before;
+	SAPath* after;
+	float path_sum = 0;
+
+	SAPath()
+		: X(0), Y(0), Sum(0.0), Length(0.0), old_dir(0)
+		, before(nullptr), after(nullptr) {}
+
+	SAPath(int x, int y, int nxx, int nyy, float sum, float len, int od, int cd, float ps)
+		: X(x), Y(y), Sum(sum), Length(len), old_dir(od), cur_dir(cd), path_sum(ps)
+		, before(nullptr), after(nullptr), nx(nxx), ny(nyy) {}
 };
 
 // Global Const
