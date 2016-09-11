@@ -2,6 +2,7 @@
 
 #pragma once
 #include <map>
+#include <list>
 #include "GameFramework/Actor.h"
 #include "Wall.h"
 #include "Misc.h"
@@ -61,7 +62,9 @@ protected:
 
 	void						GenerateMinimumSpanningTree();
 	void						CreatePathsBetweenRooms();
-	void						FindAStarPaths(const SDoor& d1, const SDoor& d2);
+	void						FindAStarPaths(SDoor* d1, SDoor* d2);
+	int							GetAStarG(const SPoint& start, const SPoint& end);
+	void						CheckNeighbours(SPath* cur, const SPoint& start, const SPoint& end, std::list <SPath*>& open_list, std::list<SPath*>& closed_list);
 
 	// Mesh Placers
 	//////////////////////////////////////////////////////////////////////////

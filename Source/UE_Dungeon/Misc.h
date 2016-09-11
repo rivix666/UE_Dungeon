@@ -139,28 +139,43 @@ struct SRoom
 	}
 };
 
-struct SAPath
+struct SPath
 {
-	int X;
-	int Y;
-	int nx;
-	int ny;
-	float Sum;
-	float Length; // Straight langth
-	int old_dir = 0;
-	int cur_dir = 0;
-	SAPath* before;
-	SAPath* after;
-	float path_sum = 0;
+	SPoint pos;
+	int g;
+	int h;
+	int f;
+	SPath* parent;
 
-	SAPath()
-		: X(0), Y(0), Sum(0.0), Length(0.0), old_dir(0)
-		, before(nullptr), after(nullptr) {}
+	SPath(int x, int y, int G, int H, SPath* Parent = nullptr) : pos(SPoint(x, y)), g(G), h(H), f(g + h), parent(Parent) {}
+	SPath(SPoint Pos, int G, int H, SPath* Parent = nullptr) : pos(Pos), g(G), h(H), f(g + h), parent(Parent) {}
+	SPath() : pos(SPoint(0, 0)), g(0), h(0), f(0), parent(nullptr) {}
 
-	SAPath(int x, int y, int nxx, int nyy, float sum, float len, int od, int cd, float ps)
-		: X(x), Y(y), Sum(sum), Length(len), old_dir(od), cur_dir(cd), path_sum(ps)
-		, before(nullptr), after(nullptr), nx(nxx), ny(nyy) {}
+	bool operator==(const SPoint& r)
+	{
+		return pos == r;
+	}
+
+	bool operator==(const SPath& r)
+	{
+		//         int sum = g + h;
+		//         int sum2 = r.g + r.h;
+		//         return sum == sum2;
+
+		return pos == r.pos;
+	}
+
+	bool operator>(const SPath& r)
+	{
+		return f > r.f;
+	}
+
+	bool operator<(const SPath& r)
+	{
+		return f < r.f;
+	}
 };
+
 
 // Global Const
 //////////////////////////////////////////////////////////////////////////
