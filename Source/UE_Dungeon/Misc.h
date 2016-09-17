@@ -23,9 +23,10 @@ enum ECornerDir
 
 enum ETileType
 {
-	Nothing = 64,
+	Nothing = 0,
 	SolidRock = 128,
 	Room = 256,
+	RoomWall = 2048,
 	Corridor = 512,
 	Doors = 1024,
 };
@@ -46,6 +47,14 @@ struct SPoint
 		bool result = true;
 		result = result && (X == r.X);
 		result = result && (Y == r.Y);
+		return result;
+	}
+
+	bool operator!=(const SPoint& r)
+	{
+		bool result = true;
+		result = result && (X != r.X);
+		result = result && (Y != r.Y);
 		return result;
 	}
 

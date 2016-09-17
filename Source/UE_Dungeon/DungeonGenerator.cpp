@@ -197,7 +197,7 @@ void ADungeonGenerator::ClearMazeArray()
 	{
 		for (int j = 0; j < m_MaxHeight; j++)
 		{
-			m_MazeArr[i][j] = SolidRock; //0;//SolidRock todo obadac
+			m_MazeArr[i][j] = Nothing; // SolidRock; //0;//SolidRock todo obadac
 		}
 	}
 
@@ -356,6 +356,18 @@ SRoom& ADungeonGenerator::CarveRoom(int x, int y, int size_x, int size_y)
 		}
 	}
 
+	for (int i = -1; i < size_x + 1; i++)
+	{
+		m_MazeArr[x + i][y - 1] = RoomWall;
+		m_MazeArr[x + i][y + size_y] = RoomWall;
+	}
+
+	for (int i = -1; i < size_x + 1; i++)
+	{
+		m_MazeArr[x - 1][y + i] = RoomWall;
+		m_MazeArr[x + size_x][y + i] = RoomWall;
+	}
+
 	m_RoomsVec.push_back(SRoom(x, y, size_x, size_y));
 	return m_RoomsVec.back();
 }
@@ -488,7 +500,7 @@ bool ADungeonGenerator::AreFieldsEmpty(int x, int y, int size_x, int size_y)
 	{
 		for (int j = 0; j < size_ny; j++)
 		{
-			if (m_MazeArr[nx + i][ny + j] != SolidRock)
+			if (m_MazeArr[nx + i][ny + j] != Nothing) //solidrock
 				return false;
 		}
 	}
@@ -571,8 +583,17 @@ void ADungeonGenerator::FindAStarPaths(SDoor* d1, SDoor* d2)
 		return;
 
 	SPath* current;
-	SPoint start_pos(d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir], d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir]);
-	SPoint end_pos(d2->OutsideDoor.X + m_DirXArr[d2->InsideDoorDir], d2->OutsideDoor.Y + m_DirYArr[d2->InsideDoorDir]);
+	SPoint start_pos(d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir] * 2, d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir] * 2); //todo nie wime czy dziala
+	SPoint end_pos(d2->OutsideDoor.X + m_DirXArr[d2->InsideDoorDir] * 2, d2->OutsideDoor.Y + m_DirYArr[d2->InsideDoorDir] * 2);
+
+
+
+	m_MazeArr[(int)d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir]][(int)d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir]] = d1->InsideDoorDir | d1->OutsideDoorDir; //todo zobaczyc
+
+
+
+
+
 
 	std::list <SPath*> open_list;
 	std::list <SPath*> closed_list;
@@ -623,30 +644,31 @@ void ADungeonGenerator::FindAStarPaths(SDoor* d1, SDoor* d2)
 			break;
 	}
 
-
 	SPath* old_cur = current;
 	current = current->parent;
+	int old_dir = d2->OutsideDoorDir;
 	while (current)
 	{
+		int dir = 0;
 		int x = old_cur->pos.X - current->pos.X;
 		int y = old_cur->pos.Y - current->pos.Y;
-		int dirs = 0;
-		
-		if (x == 0)
-			dirs = N | S;
-		else if (y == 0)
-			dirs = W | E;
-		else
-		{
-			dirs |= x > 0 ? E : W;
-			dirs |= y > 0 ? S : N;
-		}
 
-		m_MazeArr[current->pos.X][current->pos.Y] = dirs;
+		if (x != 0)
+		{
+			dir |= x > 0 ? E : W;
+		}
+		if (y != 0)
+		{
+			dir |= y > 0 ? S : N;
+		}
+				
+		m_MazeArr[current->pos.X][current->pos.Y] |= dir | old_dir;
+		old_cur = current;
 		current = current->parent;
+		old_dir = dir;
 	}
 
-// 	for (SPath* p : open_list)
+// 	for (SPath* p : open_list) //todo obadac czemu crashe
 // 		if (p)
 // 			delete p;
 // 
@@ -666,8 +688,11 @@ void ADungeonGenerator::CheckNeighbours(SPath* cur, const SPoint& start, const S
 {
 	SPoint cur_pos = cur->pos;
 	SPoint pos = start;
-	if (m_MazeArr[pos.X][pos.Y] != Room)
+	if (m_MazeArr[pos.X][pos.Y] != Room && m_MazeArr[pos.X][pos.Y] != RoomWall)
 	{
+		if (m_MazeArr[pos.X][pos.Y] == Doors && pos != end)
+			return;
+
 		SPath* path = new SPath(pos, 0, 0, cur);
 		if (std::find_if(closed_list.begin(), closed_list.end(), [=](SPath* p) { return p->pos == path->pos; }) == closed_list.end())
 		{
