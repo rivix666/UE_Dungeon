@@ -60,6 +60,11 @@ protected:
 	int                         IsThereAnyNeighbour(int x, int y, int type);
 	bool                        AreFieldsEmpty(int x, int y, int size_x, int size_y);
 
+	// Maze gen
+	void                        CarveCorridorsBetweenRooms(int attempts = 0); // with attempts == 0, slow but check every possibility, with attempts > 0 faster but may result with empty spaces
+
+
+	// A Star
 	void						GenerateMinimumSpanningTree();
 	void						CreatePathsBetweenRooms();
 	void						FindAStarPaths(SDoor* d1, SDoor* d2);
@@ -107,14 +112,16 @@ private:
 	std::map <int, int>        m_DirOppositeArr;
 
 	std::vector <SRoom>        m_RoomsVec;
+    std::vector <AActor*>      m_LastWalls;
 
 	uint					   m_TorchIncrementator;;
 	uint					   m_TorchModulo;
 
+    // Debug
+    //////////////////////////////////////////////////////////////////////////
+    void DrawDebugBoxes();
+    void DrawDebugStrings();
 
-
-
-
-
+    //////////////////////////////////////////////////////////////////////////
 	void                        GenMazeRecursiveBacktracking(int pos_x, int pos_y);
 };

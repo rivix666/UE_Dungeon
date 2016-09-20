@@ -34,6 +34,8 @@ void ADungeonGenerator::BeginPlay()
 
 	RemoveUnnecessaryTiles();
 
+/*	CarveCorridorsBetweenRooms(1);*/
+
 	for(SRoom room : m_RoomsVec)
 		PlaceRoom(room);
 
@@ -50,100 +52,20 @@ void ADungeonGenerator::BeginPlay()
 		}
 	}
 
-  //  carve_passage(1, 1);
+
+   	for (int i = 0; i < m_MaxWidth; i++)
+   	{
+   		for (int j = 0; j < m_MaxHeight; j++)
+   		{
+   			if (m_MazeArr[i][j] != Room)
+   				if (m_MazeArr[i][j])
+   				PlacePassage(i, j, m_MazeArr[i][j]);
+   		}
+   	}
 
 
-	//dead end test
-// 	PlacePassage(0.0, 0.0, N);
-// 	PlacePassage(5.0, 0.0, E);
-// 	PlacePassage(10.0, 0.0, S);
-// 	PlacePassage(15.0, 0.0, W);
-
-	// corridors test
-//   	PlacePassage(0, 0, N | E);
-//  // 	//PlacePassage(0, -2, N | S);
-//  // 	//PlacePassage(2, 0, W | E);
-//  	//PlacePassage(5.0, 0.0, S | E);
-//  	PlacePassage(5.0, 0.0, S | E);
-//  	PlacePassage(10.0, 0.0, W | S);
-//  	PlacePassage(15.0, 0.0, N | W);
-
-	// cross road test
-// 	PlacePassage(0, 0, N | E | S | W);
-// 	PlacePassage(0, -2, N | S);
-// 	PlacePassage(0, 2, N | S);
-// 	PlacePassage(-2, 0, W | E);
-// 	PlacePassage(2, 0, W | E);
-
-	// T cross test
-	//PlacePassage(0, 0, N | E | W);
-	////PlacePassage(-2, 0, W | E);
-	////PlacePassage(2, 0, W | E);
-	////PlacePassage(0, -2, N | S);
-	//PlacePassage(5, 0, S | E | W);
-	//PlacePassage(10, 0, E | S | N);
-	//PlacePassage(15, 0, W | S | N);
-
-	// Test mini korytarzyk
-	//////////////////////////////////////////////////////////////////////////
-//  	PlacePassage(0, 0, N | E | S | W);
-// 	PlacePassage(0, 2, N | S);
-// 	PlacePassage(-2, 0, W | E);
-// 	PlacePassage(2, 0, W | E);
-//  	PlacePassage(0, -2, N | S);
-// 
-//  	PlacePassage(0, -3, N | S);
-//  	PlacePassage(0, -4, N | S);
-//  	PlacePassage(0, -5, N | S);
-//  	PlacePassage(0, -7, N | W);
-//  	PlacePassage(2, -7, E | W);
-//  	PlacePassage(3, -7, E | W);
-//  	PlacePassage(5, -7, N | E);	// yo zwyrolu :P, obczaj to 
-//  	PlacePassage(5, -5, N | S); // przy pomocy tego zrobimy maly korytarzo labiryncik :D
-//  	PlacePassage(5, -4, N | S);
-//  	PlacePassage(5, -3, N | S);
-//  	PlacePassage(5, -2, N | S);
-//  	PlacePassage(5, 0, N | E | W);
-//  	PlacePassage(3, 0, E | W);
-//  	PlacePassage(8, 0, E | N);
-// 	PlacePassage(8, 2, N | S);
-//  PlacePassage(8, 4, E | S);
-// 	PlacePassage(6, 4, E | W);
-// 	PlacePassage(5, 4, E | W);
-// 	PlacePassage(4, 4, E | W);
-// 	PlacePassage(3, 4, E | W);
-// 	PlacePassage(2, 4, E | W);
-// 	PlacePassage(0, 4, W | S);
-// 	PlacePassage(-3, 0, E | W);
-// 	PlacePassage(-4, 0, W | E);
-// 	PlacePassage(-5, 0, E | W);
-// 	PlacePassage(-6, 0, W | E);
-// 	PlacePassage(-7, 0, E | W);
-// 	PlacePassage(-8, 0, W | E);
-// 	PlacePassage(-9, 0, E | W);
-// 	PlacePassage(-10, 0, W | E);
-// 	PlacePassage(-11, 0, E);
-	//////////////////////////////////////////////////////////////////////////
-
-  	for (int i = 0; i < m_MaxWidth; i++)
-  	{
-  		for (int j = 0; j < m_MaxHeight; j++)
-  		{
-  			std::wstringstream ws;
-  			ws << m_MazeArr[i][j] << "|";
-  			OutputDebugString(ws.str().c_str());
-  			if (m_MazeArr[i][j] != Room)
-  				if (m_MazeArr[i][j])
-  				PlacePassage(i, j, m_MazeArr[i][j]);
-  		}
-  		std::wstringstream ws;
-  		ws <<  "\n";
-  		OutputDebugString(ws.str().c_str());
-  	}
-  
-
-
-	//PlaceWalls();
+    DrawDebugBoxes();
+    DrawDebugStrings();
 
 	SpawnPlayerInRoom(m_RoomsVec[0]);
 }
@@ -255,37 +177,20 @@ void ADungeonGenerator::GenRooms(int attempts, bool first /*=false*/)
 			CreateDoors(CarveRoom(nx, ny, size_x, size_y));
 		}
 	}
-
-	//////////////////////////////////////////////////////////////////////////
-	//	DEBUG	
-	//////////////////////////////////////////////////////////////////////////
-// 	 	std::ofstream myfile;
-// 	 	myfile.open("example.txt");
-// 	 	for (int i = 0; i < m_MaxWidth; i++)
-// 	 	{
-// 	 		std::string aha;
-// 	 		for (int j = 0; j < m_MaxHeight; j++)
-// 	 		{
-// 	 			std::string tmp;
-// 	 
-// 	 			std::stringstream out;
-// 	 			out << m_MazeArr[i][j];
-// 	 			tmp = out.str();
-// 	 
-// 	 			aha += tmp;
-// 	 		}
-// 	 		aha += "\n";
-// 	 		myfile << aha.c_str();
-// 	 	}
-// 	 	myfile.close();
-	//////////////////////////////////////////////////////////////////////////
 }
 
 
 void ADungeonGenerator::AddDoors(int x, int y, EDir dir, SRoom& room)
 {
-	m_MazeArr[x][y] = Doors;
-	room.RoomDoors.push_back(SDoor(FVector2D(x, y), dir));
+	m_MazeArr[x][y] = Doors; // inside
+    room.RoomDoors.push_back(SDoor(FVector2D(x, y), dir));
+
+    SDoor d = room.RoomDoors.back();
+    int nx = (int)d.OutsideDoor.X;
+    int ny = (int)d.OutsideDoor.Y;
+    m_MazeArr[nx][ny] = Doors; // outside
+    m_MazeArr[nx + m_DirXArr[dir >> 1]][ny + m_DirYArr[dir >> 1]] = RoomWall; // outside
+    m_MazeArr[nx + m_DirXArr[dir << 1]][ny + m_DirYArr[dir << 1]] = RoomWall; // outside
 }
 
 void ADungeonGenerator::CreateDoors(SRoom& room)
@@ -362,7 +267,7 @@ SRoom& ADungeonGenerator::CarveRoom(int x, int y, int size_x, int size_y)
 		m_MazeArr[x + i][y + size_y] = RoomWall;
 	}
 
-	for (int i = -1; i < size_x + 1; i++)
+	for (int i = -1; i < size_y + 1; i++)
 	{
 		m_MazeArr[x - 1][y + i] = RoomWall;
 		m_MazeArr[x + size_x][y + i] = RoomWall;
@@ -508,6 +413,37 @@ bool ADungeonGenerator::AreFieldsEmpty(int x, int y, int size_x, int size_y)
 	return true;
 }
 
+// Maze Gen
+//////////////////////////////////////////////////////////////////////////
+void ADungeonGenerator::CarveCorridorsBetweenRooms(int attempts /*= 0*/)
+{
+	if (attempts > 0)
+	{
+		int nx, ny;
+		for (int i = 0; i < attempts; i++)
+		{
+			nx = FMath::RandRange(0, m_MaxWidth - 1);
+			ny = FMath::RandRange(0, m_MaxHeight - 1);
+			GenMazeRecursiveBacktracking(nx, ny);
+		}
+	}
+	else
+	{
+		for (int i = 1; i < m_MaxWidth - 1; i += 2)
+		{
+			for (int j = 1; j < m_MaxHeight - 1; j += 2)
+			{
+				if (CheckNeighbours(i, j, SolidRock) > 2)
+				{
+					GenMazeRecursiveBacktracking(i, j);
+				}
+			}
+		}
+	}
+}
+
+// AStar
+//////////////////////////////////////////////////////////////////////////
 void ADungeonGenerator::GenerateMinimumSpanningTree()
 {
 	int rooms_count = m_RoomsVec.size();
@@ -586,13 +522,10 @@ void ADungeonGenerator::FindAStarPaths(SDoor* d1, SDoor* d2)
 	SPoint start_pos(d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir] * 2, d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir] * 2); //todo nie wime czy dziala
 	SPoint end_pos(d2->OutsideDoor.X + m_DirXArr[d2->InsideDoorDir] * 2, d2->OutsideDoor.Y + m_DirYArr[d2->InsideDoorDir] * 2);
 
+     m_MazeArr[start_pos.X][start_pos.Y] = RoomWall;
+     m_MazeArr[end_pos.X][end_pos.Y] = RoomWall;
 
-
-	m_MazeArr[(int)d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir]][(int)d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir]] = d1->InsideDoorDir | d1->OutsideDoorDir; //todo zobaczyc
-
-
-
-
+	//m_MazeArr[(int)d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir]][(int)d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir]] = d1->InsideDoorDir | d1->OutsideDoorDir; //todo zobaczyc
 
 
 	std::list <SPath*> open_list;
@@ -642,32 +575,44 @@ void ADungeonGenerator::FindAStarPaths(SDoor* d1, SDoor* d2)
 
 		if (open_list.size() == 0)
 			break;
+    }
+
+    SPath* old_cur = current;
+    current = current->parent;
+   // int old_dir = d2->OutsideDoorDir;
+    int dir = 0;
+    int old_dir = 0;
+
+    while (current)
+    {
+        dir = 0;
+        old_dir = 0;
+
+
+
+        if (old_cur->pos.X != current->pos.X)
+        {
+            dir |= old_cur->pos.X > current->pos.X ? W : E;
+            old_dir |= old_cur->pos.X < current->pos.X ? W : E;
+        }
+        if (old_cur->pos.Y != current->pos.Y)
+        {
+            dir |= old_cur->pos.Y > current->pos.Y ? N : S;
+            old_dir |= old_cur->pos.Y < current->pos.Y ? N : S;
+        }
+
+       //if (dir == m_DirOppositeArr[old_dir])
+      //  {
+            m_MazeArr[old_cur->pos.X][old_cur->pos.Y] |= old_dir;
+            m_MazeArr[current->pos.X][current->pos.Y] |= dir;
+      //  }
+        old_cur = current;
+        current = current->parent;
+		//old_dir = dir;
 	}
 
-	SPath* old_cur = current;
-	current = current->parent;
-	int old_dir = d2->OutsideDoorDir;
-	while (current)
-	{
-		int dir = 0;
-		int x = old_cur->pos.X - current->pos.X;
-		int y = old_cur->pos.Y - current->pos.Y;
-
-		if (x != 0)
-		{
-			dir |= x > 0 ? E : W;
-		}
-		if (y != 0)
-		{
-			dir |= y > 0 ? S : N;
-		}
-				
-		m_MazeArr[current->pos.X][current->pos.Y] |= dir | old_dir;
-		old_cur = current;
-		current = current->parent;
-		old_dir = dir;
-	}
-
+    m_MazeArr[old_cur->pos.X][old_cur->pos.Y] = dir | d2->OutsideDoorDir; //|= d2->InsideDoorDir;
+    m_MazeArr[end_pos.X][end_pos.Y] = dir | d2->OutsideDoorDir;
 // 	for (SPath* p : open_list) //todo obadac czemu crashe
 // 		if (p)
 // 			delete p;
@@ -686,11 +631,11 @@ int ADungeonGenerator::GetAStarG(const SPoint& start, const SPoint& end)
 
 void ADungeonGenerator::CheckNeighbours(SPath* cur, const SPoint& start, const SPoint& end, std::list <SPath*>& open_list, std::list<SPath*>& closed_list)
 {
-	SPoint cur_pos = cur->pos;
+	//SPoint cur_pos = cur->pos;
 	SPoint pos = start;
-	if (m_MazeArr[pos.X][pos.Y] != Room && m_MazeArr[pos.X][pos.Y] != RoomWall)
+	if ((m_MazeArr[pos.X][pos.Y] != Room && m_MazeArr[pos.X][pos.Y] != RoomWall) || pos == end)
 	{
-		if (m_MazeArr[pos.X][pos.Y] == Doors && pos != end)
+		if (m_MazeArr[pos.X][pos.Y] == Doors)
 			return;
 
 		SPath* path = new SPath(pos, 0, 0, cur);
@@ -699,7 +644,7 @@ void ADungeonGenerator::CheckNeighbours(SPath* cur, const SPoint& start, const S
 			if (std::find_if(open_list.begin(), open_list.end(), [=](SPath* p) { return p->pos == path->pos; }) == open_list.end())
 			{
 				path->g = GetAStarG(pos, end);
-				path->h = cur->h + 10;
+                path->h = m_MazeArr[pos.X][pos.Y] == Nothing ? cur->h + 10 : cur->h;
 				path->f = path->g + path->h;
 				path->parent = cur;
 				open_list.push_back(path);
@@ -1137,6 +1082,84 @@ int ADungeonGenerator::carve_passage(int cx, int cy)
     return 0;
 }
 
+// Debug
+//////////////////////////////////////////////////////////////////////////
+void ADungeonGenerator::DrawDebugBoxes()
+{
+    for (int i = 0; i < m_MaxWidth; i++)
+    {
+        for (int j = 0; j < m_MaxHeight; j++)
+        {
+            if (m_MazeArr[i][j] == RoomWall)
+            {
+                DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(255, 0, 0, 155), true);
+                continue;
+            }
+            else if (m_MazeArr[i][j] == Doors)
+            {
+                DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(0, 255, 0, 155), true);
+                continue;
+            }
+            else if (m_MazeArr[i][j] == Room)
+            {
+                continue;
+            }
+            else if (m_MazeArr[i][j] == Corridor)
+            {
+                DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(200, 150, 50, 155), true);
+                continue;
+            }
+            else if (m_MazeArr[i][j] != Nothing)
+            {
+                DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(0, 0, 255, 155), true);
+                continue;
+            }
+        }
+    }
+}
+
+void ADungeonGenerator::DrawDebugStrings()
+{
+    for (int i = 0; i < m_MaxWidth; i++)
+    {
+        for (int j = 0; j < m_MaxHeight; j++)
+        {
+            if (m_MazeArr[i][j] == RoomWall)
+            {
+                continue;
+            }
+            else if (m_MazeArr[i][j] == Doors)
+            {
+                continue;
+            }
+            else if (m_MazeArr[i][j] == Room)
+            {
+                continue;
+            }
+            else if (m_MazeArr[i][j] != Nothing)
+            {
+                int dirs = m_MazeArr[i][j];
+                FString str("");
+                
+                if (dirs & N)
+                    str += "|N";
+                if (dirs & S)
+                    str += "|S";
+                if (dirs & W)
+                    str += "|W";
+                if (dirs & E)
+                    str += "|E";
+
+                DrawDebugString(GetWorld(), FVector(A2W(i), A2W(j), 300.0), str, nullptr, FColor::White, 10000.0F);
+                continue;
+            }
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 void ADungeonGenerator::GenMazeRecursiveBacktracking(int pos_x, int pos_y)
 {
 	int nx, ny;

@@ -86,16 +86,16 @@ struct SDoor
 		OutsideDoorDir(S),
 		SpanningTreeDoor(nullptr) {}
 
-	SDoor(FVector2D in, FVector2D out, EDir in_d, EDir out_d) :
+	SDoor(FVector2D in, FVector2D out, int in_d, int out_d) :
 		InsideDoor(in),
 		OutsideDoor(out),
-		InsideDoorDir(in_d),
-		OutsideDoorDir(out_d),
+		InsideDoorDir((EDir)in_d),
+		OutsideDoorDir((EDir)out_d),
 		SpanningTreeDoor(nullptr) {}
 
-	SDoor(FVector2D in, EDir in_d) :
+	SDoor(FVector2D in, int in_d) :
 		InsideDoor(in),
-		InsideDoorDir(in_d),
+		InsideDoorDir((EDir)in_d),
 		SpanningTreeDoor(nullptr)
 	{
 		switch (in_d)
