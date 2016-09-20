@@ -25,6 +25,7 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	// UE Properties
+    // Single Walls
 	UPROPERTY(EditDefaultsOnly, Category = "Simple Wall 0")
 		TSubclassOf<AWall> m_Wall0;
 	UPROPERTY(EditDefaultsOnly, Category = "Simple Wall 1")
@@ -38,6 +39,19 @@ public:
 		TSubclassOf<AWall> m_WallCorner1_In;
 	UPROPERTY(EditDefaultsOnly, Category = "Wall Corner 2 Out")
 		TSubclassOf<AWall> m_WallCorner2_Out;
+
+    // Corridors
+    UPROPERTY(EditDefaultsOnly, Category = "Corridor")
+        TSubclassOf<AWall> m_Corridor;
+    UPROPERTY(EditDefaultsOnly, Category = "Dead End")
+        TSubclassOf<AWall> m_DeadEnd;
+    UPROPERTY(EditDefaultsOnly, Category = "Turn")
+        TSubclassOf<AWall> m_Turn;
+    UPROPERTY(EditDefaultsOnly, Category = "T-Cross")
+        TSubclassOf<AWall> m_T_Cross;
+    UPROPERTY(EditDefaultsOnly, Category = "Cross")
+        TSubclassOf<AWall> m_Cross;
+
 
 protected:
 	// Maze array controll methods
