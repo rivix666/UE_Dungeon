@@ -75,8 +75,10 @@ protected:
 	bool                        AreFieldsEmpty(int x, int y, int size_x, int size_y);
 
 	// Maze gen
+    void                        GenMazeGrowingTreeAlgorithm(int start_x, int start_y);
+    SCell                       GenSCell(int x, int y);
 	void                        CarveCorridorsBetweenRooms(int attempts = 0); // with attempts == 0, slow but check every possibility, with attempts > 0 faster but may result with empty spaces
-
+    
 
 	// A Star
 	void						GenerateMinimumSpanningTree();

@@ -69,6 +69,16 @@ struct SPoint
 	}
 };
 
+struct SCell
+{
+    SPoint pos;
+    std::vector <SPoint> unvisited;
+
+    SCell() : pos(0, 0) { unvisited.reserve(4); }
+    SCell(int x, int y) : pos(x, y) { unvisited.reserve(4); }
+    SCell(SPoint p) : pos(p) { unvisited.reserve(4); }
+};
+
 
 struct SDoor
 {
