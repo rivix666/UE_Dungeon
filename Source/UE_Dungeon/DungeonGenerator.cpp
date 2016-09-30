@@ -19,7 +19,7 @@ ADungeonGenerator::ADungeonGenerator() :
     m_TorchIncrementator(0),
     m_TorchModulo(FMath::RandRange(3, 8))
 {
-    PrimaryActorTick.bCanEverTick = true;// /*true*/;
+    PrimaryActorTick.bCanEverTick =true;
     InitMazeArray();
     InitDirectionArrays();
 }
@@ -39,7 +39,7 @@ void ADungeonGenerator::BeginPlay()
 
     // Maze
     //////////////////////////////////////////////////////////////////////////
-    //GenMazeGrowingTreeAlgorithm(4, 4);//(int)m_RoomsVec[0].RoomDoors[0].OutsideDoor.X, (int)m_RoomsVec[0].RoomDoors[0].OutsideDoor.Y);
+   // GenMazeGrowingTreeAlgorithm(4, 4);//(int)m_RoomsVec[0].RoomDoors[0].OutsideDoor.X, (int)m_RoomsVec[0].RoomDoors[0].OutsideDoor.Y);
     //////////////////////////////////////////////////////////////////////////
 
     // AStar
@@ -70,12 +70,10 @@ void ADungeonGenerator::BeginPlay()
 //                     PlacePassage(i, j, m_MazeArr[i][j]);
 //         }
 //     }
-    //////////////////////////////////////////////////////////////////////////
-
-
+	//////////////////////////////////////////////////////////////////////////
 
     // DrawDebugBoxes();
-    DrawDebugStrings();
+   // DrawDebugStrings();
 
     SpawnPlayerInRoom(m_RoomsVec[0]);
 }
@@ -85,68 +83,91 @@ void ADungeonGenerator::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    static std::vector <SCell> cells;
-    static bool boo = true;
-    if (boo)
-    {
-        cells.push_back(GenSCell(4, 4));
-        boo = false;
-    }
-
-   
-    if (cells.size() > 0)
-    {
-        if (cells.back().unvisited.size() == 0)
-        {
-            cells.pop_back();
-            return;
-        }
-
-        SPoint pos = cells.back().pos;
-        SPoint npos = cells.back().unvisited.back();
-        cells.back().unvisited.pop_back();
-
-        if (m_MazeArr[npos.X][npos.Y] != Nothing)
-            return;
-
-        int dir = 0;
-        int old_dir = 0;
-        if (pos.X != npos.X)
-        {
-            dir |= pos.X > npos.X ? W : E;
-            old_dir |= pos.X < npos.X ? W : E;
-        }
-        if (pos.Y != npos.Y)
-        {
-            dir |= pos.Y > npos.Y ? N : S;
-            old_dir |= pos.Y < npos.Y ? N : S;
-        }
-
-        m_MazeArr[pos.X][pos.Y] |= dir | old_dir; // old_dir opposite
-         //m_MazeArr[npos.X][npos.Y] |= old_dir/* | old_dir*/;
-
-        // Debug
-        //////////////////////////////////////////////////////////////////////////
-        DrawDebugSolidBox(GetWorld(), FVector(A2W(pos.X), A2W(pos.Y), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(0, 0, 255, 155), true);
-        //////////////////////////////////////////////////////////////////////////
-        int dirs = m_MazeArr[pos.X][pos.Y];
-        FString str("");
-
-        if (dirs & N)
-            str += "|N";
-        if (dirs & S)
-            str += "|S";
-        if (dirs & W)
-            str += "|W";
-        if (dirs & E)
-            str += "|E";
-
-        DrawDebugString(GetWorld(), FVector(A2W(pos.X), A2W(pos.Y), 300.0), str, nullptr, FColor::White, 10000.0F);
-        //////////////////////////////////////////////////////////////////////////
-
-        cells.push_back(GenSCell(npos.X, npos.Y));
-        old_dir = dir;
-    }
+     static std::vector <SCell> cells;
+     static bool boo = true;
+     if (boo)
+     {
+         cells.push_back(GenSCell(4, 4));
+         boo = false;
+     }
+ 
+     /*static int old_dir = 0;*/
+     if (cells.size() > 0)
+     {
+         if (cells.back().unvisited.size() == 0)
+         {
+             cells.pop_back();
+             return;
+         }
+ 
+         SPoint pos = cells.back().pos;
+         SPoint npos = cells.back().unvisited.back();
+         cells.back().unvisited.pop_back();
+ 
+         if (m_MazeArr[npos.X][npos.Y] != Nothing)
+             return;
+          
+         int dir = 0; 
+         int old_dir = 0;
+         //////////////////////////////////////////////////////////////////////////
+         if (pos.X != npos.X)
+         {
+             dir |= pos.X > npos.X ? W : E;
+             old_dir |= pos.X < npos.X ? W : E;
+         }
+         if (pos.Y != npos.Y)
+         {
+             dir |= pos.Y > npos.Y ? N : S;
+             old_dir |= pos.Y < npos.Y ? N : S;
+         }
+ 
+       //  m_MazeArr[pos.X][pos.Y] = dir | old_dir; // old_dir opposite
+          //m_MazeArr[npos.X][npos.Y] |= old_dir/* | old_dir*/;
+         //////////////////////////////////////////////////////////////////////////
+ //  
+ // 
+ //         if (pos.X != npos.X)
+ //         {
+ //             dir |= pos.X > npos.X ? W : E;
+ //             old_dir |= pos.X < npos.X ? W : E;
+ //         }
+ //         if (pos.Y != npos.Y)
+ //         {
+ //             dir |= pos.Y > npos.Y ? N : S;
+ //             old_dir |= pos.Y < npos.Y ? N : S;
+ //         }
+ 
+ 
+          m_MazeArr[pos.X][pos.Y] |= old_dir;
+          m_MazeArr[npos.X][npos.Y] |= dir;
+ 
+       //  PlacePassage(pos.X, pos.Y, m_MazeArr[pos.X][pos.Y]);
+ 
+           
+ // 
+ //         // Debug
+ //         //////////////////////////////////////////////////////////////////////////
+          DrawDebugSolidBox(GetWorld(), FVector(A2W(pos.X), A2W(pos.Y), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(0, 0, 255, 155), true);
+ //         //////////////////////////////////////////////////////////////////////////
+         int dirs = m_MazeArr[pos.X][pos.Y];
+         FString str("");
+ 
+         if (dirs & N)
+             str += "|N";
+         if (dirs & S) 
+             str += "|S";
+         if (dirs & W)
+             str += "|W";
+         if (dirs & E)
+             str += "|E";
+ // 
+          DrawDebugString(GetWorld(), FVector(A2W(pos.X), A2W(pos.Y), 300.0), str, nullptr, FColor::White, 10000.0F);
+ //         //////////////////////////////////////////////////////////////////////////
+ 
+         cells.push_back(GenSCell(npos.X, npos.Y));
+ /*        old_dir = m_DirOppositeArr[dir];*/
+ 
+     }
 }
 
 // Array Methods
@@ -492,7 +513,7 @@ void ADungeonGenerator::GenMazeGrowingTreeAlgorithm(int start_x, int start_y)
 {
     std::vector <SCell> cells;
     cells.push_back(GenSCell(start_x, start_y));
-
+	
     while(cells.size() > 0)
     {
         if (cells.back().unvisited.size() == 0)
@@ -508,27 +529,65 @@ void ADungeonGenerator::GenMazeGrowingTreeAlgorithm(int start_x, int start_y)
         if (m_MazeArr[npos.X][npos.Y] != Nothing)
             continue;
 
-        int dir = 0;
-        int old_dir = 0;
-        if (pos.X != npos.X)
-        {
-            dir |= pos.X > npos.X ? W : E;
-            old_dir |= pos.X < npos.X ? W : E;
-        }
-        else if (pos.Y != npos.Y)
-        {
-            dir |= pos.Y > npos.Y ? N : S;
-            old_dir |= pos.Y < npos.Y ? N : S;
-        }
+		int dir = 0;
+		int old_dir = 0;
+		if (pos.X != npos.X)
+		{
+			dir |= pos.X > npos.X ? W : E;
+			old_dir |= pos.X < npos.X ? W : E;
+		}
+		if (pos.Y != npos.Y)
+		{
+			dir |= pos.Y > npos.Y ? N : S;
+			old_dir |= pos.Y < npos.Y ? N : S;
+		}
 
-        m_MazeArr[pos.X][pos.Y] |= dir; // old_dir opposite
-        m_MazeArr[npos.X][npos.Y] |= old_dir/* | old_dir*/;
+		m_MazeArr[pos.X][pos.Y] |= old_dir;
+		m_MazeArr[npos.X][npos.Y] |= dir;
 
         cells.push_back(GenSCell(npos.X, npos.Y));
     }
 
+// Old
+//////////////////////////////////////////////////////////////////////////
+// 	int old_dir = 0;
+// 	while (cells.size() > 0)
+// 	{
+// 		if (cells.back().unvisited.size() == 0)
+// 		{
+// 			cells.pop_back();
+// 			continue;
+// 		}
+// 
+// 		SPoint pos = cells.back().pos;
+// 		SPoint npos = cells.back().unvisited.back();
+// 		cells.back().unvisited.pop_back();
+// 
+// 		if (m_MazeArr[npos.X][npos.Y] != Nothing)
+// 			continue;
+// 
+// 		int dir = 0;
+// 		//int old_dir = 0;
+// 		if (pos.X != npos.X)
+// 		{
+// 			dir |= pos.X > npos.X ? W : E;
+// 			// old_dir |= pos.X < npos.X ? W : E;
+// 		}
+// 		if (pos.Y != npos.Y)
+// 		{
+// 			dir |= pos.Y > npos.Y ? N : S;
+// 			// old_dir |= pos.Y < npos.Y ? N : S;
+// 		}
+// 
+// 		m_MazeArr[pos.X][pos.Y] |= dir | old_dir; // old_dir opposite
+// 												  //m_MazeArr[npos.X][npos.Y] |= old_dir/* | old_dir*/;
+// 
+// 		cells.push_back(GenSCell(npos.X, npos.Y));
+// 		old_dir = m_DirOppositeArr[dir];
+// 	}
 
-
+	//old old
+//////////////////////////////////////////////////////////////////////////
 //     std::vector <SCell> cells;
 //     cells.push_back(GenSCell(start_x, start_y));
 // 
@@ -588,7 +647,8 @@ SCell ADungeonGenerator::GenSCell(int x, int y)
         {
             if (x > 1)
                 if (m_MazeArr[x - 1][y] == Nothing)
-                    if(CheckNeighbours(x - 1, y, Nothing) > 3)
+                    if(CheckNeighbours(x - 1, y, Nothing) > 2)
+                        if (CheckNeighboursCross(x - 1, y, Nothing) > 2)
                         cell.unvisited.push_back(SPoint(x - 1, y));
             continue;
         }
@@ -597,7 +657,8 @@ SCell ADungeonGenerator::GenSCell(int x, int y)
         {
             if (x < m_MaxWidth - 2)
                 if (m_MazeArr[x + 1][y] == Nothing)
-                    if (CheckNeighbours(x + 1, y, Nothing) > 3)
+                    if (CheckNeighbours(x + 1, y, Nothing) > 2)
+                        if (CheckNeighboursCross(x + 1, y, Nothing) > 2)
                     cell.unvisited.push_back(SPoint(x + 1, y));
             continue;
         }
@@ -605,7 +666,8 @@ SCell ADungeonGenerator::GenSCell(int x, int y)
         {
             if (y > 1)
                 if (m_MazeArr[x][y - 1] == Nothing)
-                    if (CheckNeighbours(x, y - 1, Nothing) > 3)
+                    if (CheckNeighbours(x, y - 1, Nothing) > 2)
+                        if (CheckNeighboursCross(x, y - 1, Nothing) > 2)
                     cell.unvisited.push_back(SPoint(x, y - 1));
             continue;
         }
@@ -613,7 +675,8 @@ SCell ADungeonGenerator::GenSCell(int x, int y)
         {
             if (y < m_MaxHeight - 2)
                 if (m_MazeArr[x][y + 1] == Nothing)
-                    if (CheckNeighbours(x, y + 1, Nothing) > 3)
+                    if (CheckNeighbours(x, y + 1, Nothing) > 2)
+                        if (CheckNeighboursCross(x, y + 1, Nothing) > 2)
                     cell.unvisited.push_back(SPoint(x, y + 1));
             continue;
         }
@@ -1241,14 +1304,16 @@ AActor* ADungeonGenerator::SpawnWall(float x, float y, FRotator rot, const TSubc
         FVector newVec;
         newVec.Set(x, y, 0.0f);
 
+		FTransform transform(rot, newVec, SCALE_VEC);
+
         if (wall)
-            newActor = GetWorld()->SpawnActor<AWall>(*wall, newVec, rot, spawnParams);
+            newActor = GetWorld()->SpawnActor<AWall>(*wall, transform, spawnParams);
         else
         {
             if (m_TorchIncrementator % m_TorchModulo != 0)
-                newActor = GetWorld()->SpawnActor<AWall>(m_Wall0, newVec, rot, spawnParams);
+                newActor = GetWorld()->SpawnActor<AWall>(m_Wall0, transform, spawnParams);
             else
-                newActor = GetWorld()->SpawnActor<AWall>(m_Wall1, newVec, rot, spawnParams);
+                newActor = GetWorld()->SpawnActor<AWall>(m_Wall1, transform, spawnParams);
         }
 
         newActor->SetActorScale3D(SCALE_VEC); // set object scale
