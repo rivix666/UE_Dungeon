@@ -87,6 +87,11 @@ protected:
 	int							GetAStarG(const SPoint& start, const SPoint& end);
 	void						CheckNeighbours(SPath* cur, const SPoint& start, const SPoint& end, std::list <SPath*>& open_list, std::list<SPath*>& closed_list);
 
+	std::vector <SPoint> m_CorridorsEnds;
+
+	void                        UncarveCorridor(uint x, uint y, int when_stop);
+	bool                        NextTileInCorridor(uint& nx, uint& ny); // false == end of corridor
+
 	// Mesh Placers
 	//////////////////////////////////////////////////////////////////////////
 	void						PlaceRoom(const SRoom& room);
