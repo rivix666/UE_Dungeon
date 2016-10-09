@@ -29,7 +29,7 @@ void ADungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 	ClearMazeArray();
-	GenRooms(50, true);
+	GenRooms(100, true);
 
 
 	RemoveUnnecessaryTiles();
@@ -37,9 +37,11 @@ void ADungeonGenerator::BeginPlay()
 	for (SRoom room : m_RoomsVec)
 		PlaceRoom(room);
 
+    GenRandomBlockade(25, 2, 5);
+
 	// Maze
 	//////////////////////////////////////////////////////////////////////////
-	GenMazeGrowingTreeAlgorithm(4, 4);//(int)m_RoomsVec[0].RoomDoors[0].OutsideDoor.X, (int)m_RoomsVec[0].RoomDoors[0].OutsideDoor.Y);
+	//GenMazeGrowingTreeAlgorithm(4, 4);//(int)m_RoomsVec[0].RoomDoors[0].OutsideDoor.X, (int)m_RoomsVec[0].RoomDoors[0].OutsideDoor.Y);
 	//////////////////////////////////////////////////////////////////////////
 
 	// AStar
@@ -51,12 +53,30 @@ void ADungeonGenerator::BeginPlay()
  	    {
  	        if (d.SpanningTreeDoor)
  	        {
- 	            FindAStarPaths(&d, d.SpanningTreeDoor);
+                FindAStarPaths2(&d, d.SpanningTreeDoor); // TODO NAJWAZNIEJSZE zrobic by nie szly rownolegle sciezki bo sie jebie
  	        }
  	    }
  	}
 	//////////////////////////////////////////////////////////////////////////
 
+	int w = m_MaxWidth - 1;
+	int h = m_MaxHeight - 1;
+	for (int i = 1; i < w; i++)
+	{
+		for (int j = 1; j < h; j++)
+		{
+			if (m_MazeArr[i][j] == Corridor)
+			{
+				int dirs = 0;
+				if (m_MazeArr[i + 1][j] != Nothing && m_MazeArr[i + 1][j] != RoomWall) dirs |= W; //todo przerobic na bitowe
+				if (m_MazeArr[i - 1][j] != Nothing && m_MazeArr[i - 1][j] != RoomWall) dirs |= E;
+				if (m_MazeArr[i][j + 1] != Nothing && m_MazeArr[i][j + 1] != RoomWall) dirs |= N;
+				if (m_MazeArr[i][j - 1] != Nothing && m_MazeArr[i][j - 1] != RoomWall) dirs |= S;
+
+				m_MazeArr[i][j] = dirs;
+			}
+		}
+	}
 
 
 	// Place passages
@@ -65,15 +85,19 @@ void ADungeonGenerator::BeginPlay()
   	{
   		for (int j = 0; j < m_MaxHeight; j++)
   		{
-  			if (m_MazeArr[i][j] != Room)
-  				if (m_MazeArr[i][j])
-  					PlacePassage(i, j, m_MazeArr[i][j]);
+   			if (m_MazeArr[i][j] != Room)
+   				if (m_MazeArr[i][j])
+   					PlacePassage(i, j, m_MazeArr[i][j]);
   		}
   	}
 	//////////////////////////////////////////////////////////////////////////
+    
 
-	//DrawDebugBoxes();
-    DrawDebugStrings();
+
+
+
+   // DrawDebugBoxes(RoomWall);
+    //DrawDebugStrings();
 
 	SpawnPlayerInRoom(m_RoomsVec[0]);
 }
@@ -298,9 +322,23 @@ void ADungeonGenerator::AddDoors(int x, int y, EDir dir, SRoom& room)
 	SDoor d = room.RoomDoors.back();
 	int nx = (int)d.OutsideDoor.X;
 	int ny = (int)d.OutsideDoor.Y;
+
+	// TODO
+	//////////////////////////////////////////////////////////////////////////
+	for (int i = 0; i < 3; i++)
+	{
+		m_MazeArr[nx + m_DirXArr[dir >> 1] * i][ny + m_DirYArr[dir >> 1] * i] = RoomWall; // outside
+		m_MazeArr[nx + m_DirXArr[dir << 1] * i][ny + m_DirYArr[dir << 1] * i] = RoomWall; // outside
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		m_MazeArr[nx + m_DirXArr[dir >> 1] * i + m_DirXArr[d.InsideDoorDir]][ny + m_DirYArr[dir >> 1] * i + m_DirYArr[d.InsideDoorDir]] = RoomWall; // outside
+		m_MazeArr[nx + m_DirXArr[dir << 1] * i + m_DirXArr[d.InsideDoorDir]][ny + m_DirYArr[dir << 1] * i + m_DirYArr[d.InsideDoorDir]] = RoomWall; // outside
+	}
+	//////////////////////////////////////////////////////////////////////////
+
 	m_MazeArr[nx][ny] = Doors; // outside
-	m_MazeArr[nx + m_DirXArr[dir >> 1]][ny + m_DirYArr[dir >> 1]] = RoomWall; // outside
-	m_MazeArr[nx + m_DirXArr[dir << 1]][ny + m_DirYArr[dir << 1]] = RoomWall; // outside
 }
 
 void ADungeonGenerator::CreateDoors(SRoom& room)
@@ -426,6 +464,55 @@ void ADungeonGenerator::RemoveUnnecessaryTiles()
 		if (m_MazeArr[w][i] == Nothing || m_MazeArr[w][i] == SolidRock)
 			m_MazeArr[++w][i] = Nothing;
 	}
+}
+
+int ADungeonGenerator::GetRandomDir()
+{
+    int dir = FMath::RandRange(1, 4);
+    switch (dir)
+    {
+    case 1:
+        return N;
+    case 2:
+        return S;
+    case 3:
+        return W;
+    case 4:
+        return E;        
+    }
+
+    return N;
+}
+
+void ADungeonGenerator::GenRandomBlockade(int try_num /*= 15*/, int min_size /*= 1*/, int max_size /*= 3*/)
+{
+    for (int i = 0; i < try_num; i++)
+    {
+        int dir = GetRandomDir();
+        int size = FMath::RandRange(min_size, max_size);
+        int x = FMath::RandRange(size, m_MaxWidth  - size - 1);
+        int y = FMath::RandRange(size, m_MaxHeight - size - 1);
+
+        if (CheckNeighbours(x, y, Doors) > 0)
+            continue;
+
+        if (CheckNeighbours(x, y, RoomWall) > 0)
+            continue;
+
+        if (m_MazeArr[x][y] == Nothing)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                int nx = x + m_DirXArr[dir] * j;
+                int ny = y + m_DirYArr[dir] * j;
+
+                if (m_MazeArr[nx][ny] != Nothing)
+                    continue;
+
+                m_MazeArr[nx][ny] = RoomWall;
+            }
+        }
+    }
 }
 
 int ADungeonGenerator::CheckNeighbours(int dir, int x, int y)
@@ -604,23 +691,6 @@ void ADungeonGenerator::GenMazeGrowingTreeAlgorithm(int start_x, int start_y)
 	for (SPoint p : corridors)
 	{
 		UncarveCorridor(p.X, p.Y, 50);
-	}
-
-	for (int i = 1; i < w; i++)
-	{
-		for (int j = 1; j < h; j++)
-		{
-			if (m_MazeArr[i][j] == Corridor)
-			{
-				int dirs = 0;
-				if (m_MazeArr[i + 1][j] != Nothing) dirs |= W;
-				if (m_MazeArr[i - 1][j] != Nothing) dirs |= E;
-				if (m_MazeArr[i][j + 1] != Nothing) dirs |= N;
-				if (m_MazeArr[i][j - 1] != Nothing) dirs |= S;
-
-				m_MazeArr[i][j] = dirs;
-			}
-		}
 	}
 }
 
@@ -848,6 +918,13 @@ void ADungeonGenerator::FindAStarPaths(SDoor* d1, SDoor* d2)
 
 		if (open_list.size() == 0)
 			break;
+
+		// NEW
+		//////////////////////////////////////////////////////////////////////////
+		pos.Y++;
+		if (m_MazeArr[pos.X][pos.Y] == Nothing)
+			break;
+		//////////////////////////////////////////////////////////////////////////
 	}
 
 	SPath* old_cur = current;
@@ -858,44 +935,134 @@ void ADungeonGenerator::FindAStarPaths(SDoor* d1, SDoor* d2)
 
 	while (current)
 	{
-		dir = 0;
-		old_dir = 0;
+		//dir = 0;
+		//old_dir = 0;
 
 
 
-		if (old_cur->pos.X != current->pos.X)
-		{
-			dir |= old_cur->pos.X > current->pos.X ? W : E;
-			old_dir |= old_cur->pos.X < current->pos.X ? W : E;
-		}
-		if (old_cur->pos.Y != current->pos.Y)
-		{
-			dir |= old_cur->pos.Y > current->pos.Y ? N : S;
-			old_dir |= old_cur->pos.Y < current->pos.Y ? N : S;
-		}
+		//if (old_cur->pos.X != current->pos.X)
+		//{
+		//	dir |= old_cur->pos.X > current->pos.X ? W : E;
+		//	old_dir |= old_cur->pos.X < current->pos.X ? W : E;
+		//}
+		//if (old_cur->pos.Y != current->pos.Y)
+		//{
+		//	dir |= old_cur->pos.Y > current->pos.Y ? N : S;
+		//	old_dir |= old_cur->pos.Y < current->pos.Y ? N : S;
+		//}
 
-		//if (dir == m_DirOppositeArr[old_dir])
-	   //  {
-		m_MazeArr[old_cur->pos.X][old_cur->pos.Y] |= old_dir;
-		m_MazeArr[current->pos.X][current->pos.Y] |= dir;
-		//  }
+
+		m_MazeArr[old_cur->pos.X][old_cur->pos.Y] = Corridor;
+		m_MazeArr[current->pos.X][current->pos.Y] = Corridor;
+
 		old_cur = current;
 		current = current->parent;
-		//old_dir = dir;
 	}
 
-	//m_MazeArr[old_cur->pos.X][old_cur->pos.Y] = dir | d2->OutsideDoorDir; //|= d2->InsideDoorDir;
+
+	m_MazeArr[old_cur->pos.X][old_cur->pos.Y] = Corridor;
+	m_MazeArr[end_pos.X][end_pos.Y] = Corridor;
+
+}
 
 
-	m_MazeArr[old_cur->pos.X][old_cur->pos.Y] |= d2->InsideDoorDir;
-	m_MazeArr[end_pos.X][end_pos.Y] = old_dir | d2->OutsideDoorDir;//old_dir /*d2->InsideDoorDir*/ | d2->OutsideDoorDir;
-// 	for (SPath* p : open_list) //todo obadac czemu crashe
-// 		if (p)
-// 			delete p;
+void ADungeonGenerator::FindAStarPaths2(SDoor* d1, SDoor* d2)
+{
+	if (!d1 || !d2)
+		return;
+
+	SPath* current;
+	SPoint start_pos(d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir] * 2, d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir] * 2); //todo nie wime czy dziala
+	SPoint end_pos(d2->OutsideDoor.X + m_DirXArr[d2->InsideDoorDir] * 2, d2->OutsideDoor.Y + m_DirYArr[d2->InsideDoorDir] * 2);
+
+	m_MazeArr[start_pos.X][start_pos.Y] = RoomWall;
+	m_MazeArr[end_pos.X][end_pos.Y] = RoomWall;
+
+	//m_MazeArr[(int)d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir]][(int)d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir]] = d1->InsideDoorDir | d1->OutsideDoorDir; //todo zobaczyc
+
+
+	std::list <SPath*> open_list;
+	std::list <SPath*> closed_list;
+	open_list.push_back(new SPath(start_pos, GetAStarG(start_pos, end_pos), 0));
+	current = open_list.front();
+	current->f = current->g + current->h;
+
+	int temp = 0;
+	while (true)
+	{
+		SPath* old_cur = current;
+		current = open_list.front();
+		for (SPath* p : open_list)
+		{
+			if (p->f < current->f)
+				current = p;
+		}
+
+		if (current->pos == end_pos)
+			break;
+
+		closed_list.push_back(old_cur);
+		open_list.remove(current);
+
+		//////////////////////////////////////////////////////////////////////////
+		SPoint pos = current->pos;
+		pos.X++;
+		if (pos.X < m_MaxWidth)
+			CheckNeighbours2(current, pos, end_pos, open_list, closed_list);
+		//////////////////////////////////////////////////////////////////////////
+		pos.X--;
+		pos.Y++;
+		if (pos.Y < m_MaxHeight)
+			CheckNeighbours2(current, pos, end_pos, open_list, closed_list);
+		//////////////////////////////////////////////////////////////////////////
+		pos.X--;
+		pos.Y--;
+		if (pos.X >= 0)
+			CheckNeighbours2(current, pos, end_pos, open_list, closed_list);
+		//////////////////////////////////////////////////////////////////////////
+		pos.X++;
+		pos.Y--;
+		if (pos.Y >= 0)
+			CheckNeighbours2(current, pos, end_pos, open_list, closed_list);
+		//////////////////////////////////////////////////////////////////////////
+
+		if (open_list.size() == 0)
+			break;
+
+		// NEW
+		//////////////////////////////////////////////////////////////////////////
+// 		pos.Y++;
+// 		if (m_MazeArr[pos.X][pos.Y] == Nothing)
+// 			break;
+		//////////////////////////////////////////////////////////////////////////
+	}
+
+	SPath* old_cur = current;
+	current = current->parent;
+	// int old_dir = d2->OutsideDoorDir;
+	int dir = 0;
+	int old_dir = 0;
+
+	while (current)
+	{
+		m_MazeArr[old_cur->pos.X][old_cur->pos.Y] = Corridor;
+		m_MazeArr[current->pos.X][current->pos.Y] = Corridor;
+
+		old_cur = current;
+		current = current->parent;
+	}
 // 
-// 	for (SPath* p : closed_list)
-// 		if (p)
-// 			delete p;
+// 
+// 	m_MazeArr[old_cur->pos.X][old_cur->pos.Y] = Corridor;
+// 	m_MazeArr[end_pos.X][end_pos.Y] = Corridor;
+
+
+
+	SPoint start_pos2(d1->OutsideDoor.X + m_DirXArr[d1->InsideDoorDir], d1->OutsideDoor.Y + m_DirYArr[d1->InsideDoorDir]); //todo nie wime czy dziala
+	SPoint end_pos2(d2->OutsideDoor.X + m_DirXArr[d2->InsideDoorDir], d2->OutsideDoor.Y + m_DirYArr[d2->InsideDoorDir]);
+
+	m_MazeArr[start_pos2.X][start_pos2.Y] = Corridor;
+	m_MazeArr[end_pos2.X][end_pos2.Y]	  = Corridor;
 }
 
 int ADungeonGenerator::GetAStarG(const SPoint& start, const SPoint& end)
@@ -921,6 +1088,39 @@ void ADungeonGenerator::CheckNeighbours(SPath* cur, const SPoint& start, const S
 			{
 				path->g = GetAStarG(pos, end);
 				path->h = m_MazeArr[pos.X][pos.Y] == Nothing ? cur->h + 10 : cur->h;
+				path->f = path->g + path->h;
+				path->parent = cur;
+				open_list.push_back(path);
+			}
+			//else // mozna porownac starego rodzica czy aktualny nei ejst krotszy ale czy ja napewnoc chce najkrotsza??
+			else
+			{
+				delete path;
+			}
+		}
+		else
+		{
+			delete path;
+		}
+	}
+}
+
+void ADungeonGenerator::CheckNeighbours2(SPath* cur, const SPoint& start, const SPoint& end, std::list <SPath*>& open_list, std::list<SPath*>& closed_list)
+{
+	//SPoint cur_pos = cur->pos;
+	SPoint pos = start;
+	if ((m_MazeArr[pos.X][pos.Y] != Room && m_MazeArr[pos.X][pos.Y] != RoomWall) || pos == end)
+	{
+		if (m_MazeArr[pos.X][pos.Y] == Doors)
+			return;
+
+		SPath* path = new SPath(pos, 0, 0, cur);
+		if (std::find_if(closed_list.begin(), closed_list.end(), [=](SPath* p) { return p->pos == path->pos; }) == closed_list.end())
+		{
+			if (std::find_if(open_list.begin(), open_list.end(), [=](SPath* p) { return p->pos == path->pos; }) == open_list.end())
+			{
+				path->g = GetAStarG(pos, end);
+				path->h = m_MazeArr[pos.X][pos.Y] == Nothing ? cur->h + 10 : cur->h - 10;
 				path->f = path->g + path->h;
 				path->parent = cur;
 				open_list.push_back(path);
@@ -1481,10 +1681,11 @@ void ADungeonGenerator::DrawDebugBoxes()
 				DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(0, 255, 0, 155), true);
 				continue;
 			}
-			else if (m_MazeArr[i][j] == Room)
-			{
-				continue;
-			}
+            else if (m_MazeArr[i][j] == Room)
+            {
+                DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(30, 50, 250, 155), true);
+                continue;
+            }
 			else if (m_MazeArr[i][j] == Corridor)
 			{
 				DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(200, 150, 50, 155), true);
@@ -1497,6 +1698,65 @@ void ADungeonGenerator::DrawDebugBoxes()
 			}
 		}
 	}
+}
+
+void ADungeonGenerator::DrawDebugBoxes(ETileType tile)
+{
+    switch (tile)
+    {
+    case RoomWall:
+        for (int i = 0; i < m_MaxWidth; i++)
+        {
+            for (int j = 0; j < m_MaxHeight; j++)
+            {
+                if (m_MazeArr[i][j] == RoomWall)
+                {
+                    DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(255, 0, 0, 155), true);
+                    continue;
+                }
+            }
+        }
+        break;
+    case Doors:
+        for (int i = 0; i < m_MaxWidth; i++)
+        {
+            for (int j = 0; j < m_MaxHeight; j++)
+            {
+                if (m_MazeArr[i][j] == Doors)
+                {
+                    DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(0, 255, 0, 155), true);
+                    continue;
+                }
+            }
+        }
+        break;
+    case Room:
+        for (int i = 0; i < m_MaxWidth; i++)
+        {
+            for (int j = 0; j < m_MaxHeight; j++)
+            {
+                if (m_MazeArr[i][j] == Room)
+                {
+                    DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(30, 50, 250, 155), true);
+                    continue;
+                }
+            }
+        }
+        break;
+    case Corridor:
+        for (int i = 0; i < m_MaxWidth; i++)
+        {
+            for (int j = 0; j < m_MaxHeight; j++)
+            {
+                if (m_MazeArr[i][j] == Corridor)
+                {
+                    DrawDebugSolidBox(GetWorld(), FVector(A2W(i), A2W(j), 300.0), FVector(TILE_SIZE / 2.0, TILE_SIZE / 2.0, TILE_SIZE / 2.0), FColor(200, 150, 50, 155), true);
+                    continue;
+                }
+            }
+        }
+        break;
+    }
 }
 
 void ADungeonGenerator::DrawDebugStrings()

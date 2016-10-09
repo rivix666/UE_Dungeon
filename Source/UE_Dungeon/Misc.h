@@ -84,8 +84,8 @@ struct SDoor
 {
 	FVector2D InsideDoor;
 	FVector2D OutsideDoor;
-	EDir InsideDoorDir;
-	EDir OutsideDoorDir;
+	EDir InsideDoorDir; //todo swap bo na odwrot jest
+	EDir OutsideDoorDir;//todo swap bo na odwrot jest
 	SDoor* SpanningTreeDoor;
 	float  SpanningLength;
 

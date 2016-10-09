@@ -67,6 +67,9 @@ protected:
 	void						CreateDoors(SRoom& room);
 	SRoom&                      CarveRoom(int x, int y, int size_x, int size_y);
 	void                        RemoveUnnecessaryTiles();
+    int                         GetRandomDir();
+    void                        GenRandomBlockade(int try_num = 15, int min_size = 1, int max_size = 3);
+
 
 	int                         CheckNeighbours(int dir, int x, int y);
 	int                         CheckNeighbours(int x, int y, ETileType type);
@@ -84,8 +87,10 @@ protected:
 	void						GenerateMinimumSpanningTree();
 	void						CreatePathsBetweenRooms();
 	void						FindAStarPaths(SDoor* d1, SDoor* d2);
+	void						FindAStarPaths2(SDoor* d1, SDoor* d2);
 	int							GetAStarG(const SPoint& start, const SPoint& end);
 	void						CheckNeighbours(SPath* cur, const SPoint& start, const SPoint& end, std::list <SPath*>& open_list, std::list<SPath*>& closed_list);
+	void						CheckNeighbours2(SPath* cur, const SPoint& start, const SPoint& end, std::list <SPath*>& open_list, std::list<SPath*>& closed_list);
 
 	std::vector <SPoint> m_CorridorsEnds;
 
@@ -140,7 +145,8 @@ private:
 
     // Debug
     //////////////////////////////////////////////////////////////////////////
-    void DrawDebugBoxes();
+    void DrawDebugBoxes();               // todo rewrite by nie kopiowano kodu tak chamsko
+    void DrawDebugBoxes(ETileType tile); // todo rewrite by nie kopiowano kodu tak chamsko
     void DrawDebugStrings();
 
     //////////////////////////////////////////////////////////////////////////
